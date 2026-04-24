@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from jose import JWTError, jwt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from src.api.v1.schemas.auth import (
     FamilyRegisterRequest,
@@ -134,9 +135,12 @@ async def me(current: Member = Depends(get_current_member)):
 # ───────────────────────────────────────────────
 @router.get("/family", response_model=FamilyResponse)
 async def get_family(current: Member = Depends(get_current_admin), db: AsyncSession = Depends(get_db)):
-    family = await db.get(Family, current.family_id)
-    members = (await db.scalars(select(Member).where(Member.family_id == current.family_id))).all()
-    family.members = list(members)
+    result = await db.execute(
+        select(Family).options(selectinload(Family.members)).where(Family.id == current.family_id)
+    )
+    family = result.scalar_one_or_none()
+    if not family:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail={"code": "FAMILY_NOT_FOUND", "message": "家庭不存在"})
     return family
 
 

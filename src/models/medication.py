@@ -1,5 +1,6 @@
 """用药记录与提醒模型"""
 import uuid
+from typing import Optional
 from datetime import date, datetime
 from enum import Enum
 
@@ -31,16 +32,16 @@ class Medication(BaseModel):
         UUID(as_uuid=True), ForeignKey("members.id", ondelete="CASCADE"), nullable=False
     )
     name: Mapped[str] = mapped_column(String(200), nullable=False)
-    generic_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    generic_name: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     dosage: Mapped[str] = mapped_column(String(100), nullable=False)   # eg. "5mg"
     frequency: Mapped[str] = mapped_column(String(100), nullable=False) # eg. "每日两次"
-    instructions: Mapped[str | None] = mapped_column(Text, nullable=True)
+    instructions: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
-    end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    end_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     status: Mapped[MedicationStatus] = mapped_column(
         String(20), nullable=False, default=MedicationStatus.ACTIVE
     )
-    llm_description: Mapped[str | None] = mapped_column(Text, nullable=True)  # LLM 生成的通俗说明
+    llm_description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # LLM 生成的通俗说明
 
     member: Mapped["Member"] = relationship(back_populates="medications")
     reminders: Mapped[list["MedicationReminder"]] = relationship(
@@ -72,10 +73,10 @@ class AdherenceLog(BaseModel):
         UUID(as_uuid=True), ForeignKey("medications.id", ondelete="CASCADE"), nullable=False
     )
     scheduled_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-    actual_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    actual_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     status: Mapped[AdherenceStatus] = mapped_column(String(20), nullable=False)
-    notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    delay_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    notes: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    delay_minutes: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
     medication: Mapped["Medication"] = relationship(back_populates="adherence_logs")
 

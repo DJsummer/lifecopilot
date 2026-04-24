@@ -67,5 +67,21 @@ lint:          ## 运行 ruff 代码检查
 format:        ## 运行 ruff 格式化
 	$(DC_DEV) exec api ruff format src/
 
-test:          ## 运行单元测试
-	$(DC_DEV) exec api pytest tests/ -v
+test:          ## 运行所有单元+集成测试（排除 e2e）
+	$(DC_DEV) exec api pytest tests/ -m "not e2e" -v
+
+test-unit:     ## 仅运行单元测试
+	$(DC_DEV) exec api pytest tests/ -m unit -v
+
+test-integration: ## 仅运行集成测试
+	$(DC_DEV) exec api pytest tests/ -m integration -v
+
+test-cov:      ## 运行测试并生成覆盖率报告
+	$(DC_DEV) exec api pytest tests/ -m "not e2e" --cov=src --cov-report=html:htmlcov
+
+test-e2e:      ## 运行 Selenium 端到端测试（需前端在运行）
+	$(DC_DEV) exec api pytest tests/e2e/ -m e2e --base-url $(E2E_URL) -v
+
+test-local:    ## 本地直接运行测试（不通过 Docker）
+	pip install -r requirements-test.txt -q
+	pytest tests/ -m "not e2e" -v

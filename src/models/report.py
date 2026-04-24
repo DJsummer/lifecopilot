@@ -1,5 +1,6 @@
 """检验单与报告模型"""
 import uuid
+from typing import Optional
 from datetime import date
 from enum import Enum
 
@@ -30,12 +31,12 @@ class LabReport(BaseModel):
     )
     report_type: Mapped[ReportType] = mapped_column(String(50), nullable=False, index=True)
     report_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
-    hospital: Mapped[str | None] = mapped_column(String(200), nullable=True)
-    file_path: Mapped[str | None] = mapped_column(String(500), nullable=True)  # OSS/本地路径
-    ocr_raw_text: Mapped[str | None] = mapped_column(Text, nullable=True)      # OCR 原始文本
-    structured_data: Mapped[str | None] = mapped_column(Text, nullable=True)   # LLM 结构化 JSON
-    llm_interpretation: Mapped[str | None] = mapped_column(Text, nullable=True) # LLM 通俗解读
-    abnormal_items: Mapped[str | None] = mapped_column(Text, nullable=True)    # 异常项 JSON 数组
+    hospital: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    file_path: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)  # OSS/本地路径
+    ocr_raw_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)      # OCR 原始文本
+    structured_data: Mapped[Optional[str]] = mapped_column(Text, nullable=True)   # LLM 结构化 JSON
+    llm_interpretation: Mapped[Optional[str]] = mapped_column(Text, nullable=True) # LLM 通俗解读
+    abnormal_items: Mapped[Optional[str]] = mapped_column(Text, nullable=True)    # 异常项 JSON 数组
     has_abnormal: Mapped[bool] = mapped_column(default=False)
 
     member: Mapped["Member"] = relationship(back_populates="lab_reports")

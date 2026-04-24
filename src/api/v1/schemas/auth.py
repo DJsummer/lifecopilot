@@ -1,3 +1,5 @@
+from __future__ import annotations
+from typing import Optional
 """Pydantic 请求/响应 Schema：认证相关"""
 import uuid
 from datetime import date
@@ -13,8 +15,8 @@ class FamilyRegisterRequest(BaseModel):
     nickname: str = Field(..., min_length=1, max_length=50)
     email: EmailStr
     password: str = Field(..., min_length=8, max_length=100)
-    gender: Gender | None = None
-    birth_date: date | None = None
+    gender: Optional[Gender] = None
+    birth_date: Optional[date] = None
 
     @field_validator("password")
     @classmethod
@@ -50,18 +52,18 @@ class RefreshRequest(BaseModel):
 class MemberCreateRequest(BaseModel):
     nickname: str = Field(..., min_length=1, max_length=50)
     role: MemberRole = MemberRole.ADULT
-    gender: Gender | None = None
-    birth_date: date | None = None
-    email: EmailStr | None = None
-    password: str | None = Field(default=None, min_length=8, max_length=100)
+    gender: Optional[Gender] = None
+    birth_date: Optional[date] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = Field(default=None, min_length=8, max_length=100)
 
 
 class MemberUpdateRequest(BaseModel):
-    nickname: str | None = Field(default=None, min_length=1, max_length=50)
-    gender: Gender | None = None
-    birth_date: date | None = None
-    avatar_url: str | None = None
-    notes: str | None = None
+    nickname: Optional[str] = Field(default=None, min_length=1, max_length=50)
+    gender: Optional[Gender] = None
+    birth_date: Optional[date] = None
+    avatar_url: Optional[str] = None
+    notes: Optional[str] = None
 
 
 class MemberResponse(BaseModel):
@@ -71,10 +73,10 @@ class MemberResponse(BaseModel):
     family_id: uuid.UUID
     nickname: str
     role: MemberRole
-    gender: Gender | None
-    birth_date: date | None
-    avatar_url: str | None
-    email: str | None
+    gender: Optional[Gender]
+    birth_date: Optional[date]
+    avatar_url: Optional[str]
+    email: Optional[str]
 
 
 class FamilyResponse(BaseModel):

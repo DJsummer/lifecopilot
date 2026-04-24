@@ -1,5 +1,6 @@
 """健康记录与症状日记模型"""
 import uuid
+from typing import Optional
 from datetime import datetime
 from enum import Enum
 
@@ -42,7 +43,7 @@ class HealthRecord(BaseModel):
     unit: Mapped[str] = mapped_column(String(20), nullable=False)
     measured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
     source: Mapped[str] = mapped_column(String(50), default="manual")  # manual / wearable / import
-    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     member: Mapped["Member"] = relationship(back_populates="health_records")
 
@@ -55,10 +56,10 @@ class SymptomLog(BaseModel):
         UUID(as_uuid=True), ForeignKey("members.id", ondelete="CASCADE"), nullable=False
     )
     raw_text: Mapped[str] = mapped_column(Text, nullable=False)           # 用户原始描述
-    structured_symptoms: Mapped[str | None] = mapped_column(Text, nullable=True)  # NLP 提取后的 JSON
-    severity_score: Mapped[int | None] = mapped_column(Integer, nullable=True)    # 1-10
-    advice_level: Mapped[VisitAdviceLevel | None] = mapped_column(String(20), nullable=True)
-    llm_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    structured_symptoms: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # NLP 提取后的 JSON
+    severity_score: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)    # 1-10
+    advice_level: Mapped[Optional[VisitAdviceLevel]] = mapped_column(String(20), nullable=True)
+    llm_summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     member: Mapped["Member"] = relationship(back_populates="symptom_logs")

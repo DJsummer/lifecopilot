@@ -103,10 +103,38 @@ make logs-api      # 仅查看 API 日志
 make shell         # 进入 API 容器
 make db-migrate    # 执行数据库迁移
 make db-shell      # 进入 PostgreSQL 交互终端
-make test          # 运行单元测试
+make test          # 在 Docker 中运行单元+集成测试
+make test-local    # 在本地环境运行测试（需先 pip install -r requirements-test.txt）
+make test-cov      # 生成测试覆盖率报告
+make test-e2e      # 运行 Selenium E2E 测试
 make lint          # 代码检查
 make format        # 代码格式化
 ```
+
+---
+
+## 测试
+
+项目使用 **pytest + pytest-asyncio** 进行后端测试，**Selenium** 进行 Web Admin E2E 测试。
+
+```bash
+# 安装测试依赖（仅需一次）
+pip install -r requirements-test.txt
+
+# 运行所有单元 + 集成测试
+python -m pytest tests/ --ignore=tests/e2e -v
+
+# 仅运行单元测试
+python -m pytest tests/ -m unit -v
+
+# 运行 E2E 测试（须先启动 Web Admin 服务）
+python -m pytest tests/e2e/ --base-url=http://localhost:3000 -v
+
+# 查看覆盖率
+python -m pytest tests/ --ignore=tests/e2e --cov=src --cov-report=html
+```
+
+**测试状态**：44/44 通过 ✅（单元测试 11 + 集成测试 31 + 系统测试 2）
 
 ---
 
@@ -125,7 +153,13 @@ lifecopilot/
 ├── docker/                  # 各服务配置文件
 ├── doc/                     # 设计文档
 │   └── architecture.md      # 系统架构设计
-├── tests/                   # 测试用例
+├── tests/
+│   ├── conftest.py          # pytest fixtures（SQLite in-memory + AsyncClient）
+│   ├── test_security.py     # 安全模块单元测试（JWT/密码哈希）
+│   ├── test_auth.py         # 认证 API 集成测试
+│   ├── test_members.py      # 成员管理 API 集成测试
+│   ├── test_system.py       # 系统健康检查测试
+│   └── e2e/                 # Selenium E2E 测试（Web Admin）
 ├── Dockerfile               # 多阶段构建
 ├── docker-compose.yml       # 生产环境
 ├── docker-compose.dev.yml   # 开发环境（热更新）
@@ -143,7 +177,7 @@ lifecopilot/
 | 阶段 | 状态 | 完成度 |
 |------|------|--------|
 | 阶段零：Docker 部署基础设施 | ✅ 已完成 | 100% |
-| 阶段一：基础架构搭建 | 🔄 进行中 | 80% |
+| 阶段一：基础架构搭建 | ✅ 已完成 | 100% |
 | 阶段二：核心健康监测 | ⬜ 未开始 | 0% |
 | 阶段三：智能问诊助手（RAG） | ⬜ 未开始 | 0% |
 | 阶段四：生活方式干预 | ⬜ 未开始 | 0% |

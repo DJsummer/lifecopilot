@@ -1,5 +1,6 @@
 """家庭账户与成员模型"""
 import uuid
+from typing import Optional
 from datetime import date
 from enum import Enum
 
@@ -42,14 +43,14 @@ class Member(BaseModel):
     )
     nickname: Mapped[str] = mapped_column(String(50), nullable=False)
     role: Mapped[MemberRole] = mapped_column(String(20), nullable=False, default=MemberRole.ADULT)
-    gender: Mapped[Gender | None] = mapped_column(String(10), nullable=True)
-    birth_date: Mapped[date | None] = mapped_column(Date, nullable=True)
-    avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    gender: Mapped[Optional[Gender]] = mapped_column(String(10), nullable=True)
+    birth_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    avatar_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # 认证（可选，儿童/老人可不登录）
-    email: Mapped[str | None] = mapped_column(String(254), unique=True, nullable=True)
-    hashed_password: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    email: Mapped[Optional[str]] = mapped_column(String(254), unique=True, nullable=True)
+    hashed_password: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
 
     family: Mapped["Family"] = relationship(back_populates="members")
     health_records: Mapped[list["HealthRecord"]] = relationship(back_populates="member", cascade="all, delete-orphan")

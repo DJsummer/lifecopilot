@@ -1,0 +1,16 @@
+# ── 测试框架 ──────────────────────────────────────────────────────────
+pytest>=8.2.0
+pytest-asyncio>=0.23.0
+pytest-cov>=5.0.0
+httpx>=0.27.0              # AsyncClient for FastAPI testing
+anyio>=4.4.0
+
+# ── 数据库测试 ────────────────────────────────────────────────────────
+sqlalchemy[asyncio]>=2.0.0
+asyncpg>=0.29.0
+aiosqlite>=0.20.0          # SQLite in-memory for unit tests (no Postgres needed)
+
+# ── Selenium 前端测试 ─────────────────────────────────────────────────
+selenium>=4.20.0
+pytest-selenium>=4.1.0
+webdriver-manager>=4.0.0   # 自动管理 ChromeDriver 版本

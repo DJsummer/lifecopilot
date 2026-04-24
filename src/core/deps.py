@@ -1,3 +1,4 @@
+from __future__ import annotations
 """FastAPI 依赖注入：从请求头提取并校验 JWT，返回当前登录成员"""
 import uuid
 

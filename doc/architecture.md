@@ -683,7 +683,52 @@ Dashboard    → 家庭全员关键指标卡片 + 近期异常列表
 
 ---
 
-## 11. 待决策项
+## 11. 测试策略
+
+### 11.1 分层测试
+
+| 层次 | 工具 | 范围 | 状态 |
+|------|------|------|------|
+| 单元测试 | pytest | security.py（JWT/密码哈希） | ✅ 11 用例 |
+| 集成测试 | pytest + httpx AsyncClient | 所有 API 端点 | ✅ 31 用例 |
+| E2E 测试 | Selenium + Chrome | Web Admin 登录/Dashboard | 🔄 框架就绪 |
+
+**当前通过率：44/44（100%）**
+
+### 11.2 测试基础设施
+
+- **SQLite in-memory**：集成测试不依赖外部数据库，每用例通过事务回滚完全隔离
+- **AsyncClient + ASGITransport**：无需真实 HTTP 服务，直接测试 ASGI 应用层
+- **pytest-asyncio**（`asyncio_mode=auto`）：所有测试函数均可为 `async def`
+- **python-dotenv**：conftest.py 启动时加载 `.env.test`，与生产配置完全隔离
+- **webdriver-manager**：Selenium 自动下载 ChromeDriver，无需手动维护驱动版本
+
+### 11.3 已知约束与修复记录
+
+| 问题 | 原因 | 解决方案 |
+|------|------|---------|
+| `X \| None` 语法错误 | Python 3.9 不支持 `X \| Y` union 运算符 | 全局替换为 `Optional[X]`（`typing` 模块） |
+| SQLAlchemy `Mapped[]` 报错 | `from __future__ import annotations` 使注解变字符串 | ORM 模型文件不加此 import，非 ORM 文件保留 |
+| bcrypt `__about__` 错误 | bcrypt ≥4.0 移除了 `__about__` 属性，passlib 1.7.4 不兼容 | 降级至 `bcrypt==3.2.2` |
+| `MissingGreenlet` 懒加载 | async session 关闭后 FastAPI 序列化触发关系属性懒加载 | 改用 `selectinload()` 急加载关联关系 |
+
+### 11.4 运行方式
+
+```bash
+# 本地运行（推荐）
+pip install -r requirements-test.txt
+python -m pytest tests/ --ignore=tests/e2e -v
+
+# Docker 中运行
+make test
+
+# 覆盖率报告
+python -m pytest tests/ --ignore=tests/e2e --cov=src --cov-report=html
+```
+
+---
+
+## 12. 待决策项
 
 | 问题 | 决策结果 / 待选方案 | 优先级 |
 |------|---------------------|--------|

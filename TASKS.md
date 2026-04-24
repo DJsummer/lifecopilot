@@ -1,7 +1,7 @@
 # LifePilot - 家庭健康管理 AI 项目任务清单
 
 > 创建日期：2026-04-24  
-> 最后更新：2026-04-24（T003 完成；前端选型确定：微信小程序 + Flutter + Web 管理后台）  
+> 最后更新：2026-04-24（T-test 完成：pytest+selenium 测试框架搭建；44 个单元+集成测试全部通过）  
 > 目标：用 AI 技术实现一套家庭健康管理系统
 
 ---
@@ -14,6 +14,7 @@
 # 1. 更新 TASKS.md   → 标记完成项、更新进度百分比
 # 2. 更新 README.md  → 反映对外可见的功能/使用变化
 # 3. 更新 doc/architecture.md → 记录设计决策变更
+# 4. 补全测试
 git add .
 git commit -m "feat/fix/docs: 描述"
 git push
@@ -104,6 +105,32 @@ make dev
   - `get_current_member` 依赖：从 Bearer token 解析当前成员
   - `get_current_admin` 依赖：要求 admin 角色
   - `require_same_family()` 工具：防止跨家庭越权访问
+
+### T-test - 测试框架搭建 ✅
+> 完成于 2026-04-24
+
+- [x] 搭建 pytest + pytest-asyncio 异步测试框架（`asyncio_mode=auto`）
+- [x] 配置 SQLite in-memory 测试数据库（aiosqlite，每用例事务回滚隔离）
+- [x] 用 httpx `AsyncClient` + `ASGITransport` 进行无服务器集成测试
+- [x] 创建 `tests/conftest.py`（engine/db_session/client/registered_family/auth_headers fixtures）
+- [x] 编写 `tests/test_security.py`（密码哈希 + JWT 单元测试，11 个用例）
+- [x] 编写 `tests/test_auth.py`（注册/登录/refresh/me 集成测试，14 个用例）
+- [x] 编写 `tests/test_members.py`（家庭成员 CRUD 集成测试，15 个用例）
+- [x] 编写 `tests/test_system.py`（健康检查，2 个用例）
+- [x] 搭建 selenium E2E 测试框架（Chrome headless，`tests/e2e/`）
+- [x] 编写 `tests/e2e/test_web_admin.py`（Web Admin 登录/Dashboard E2E 测试）
+- [x] 配置 `requirements-test.txt` + `pytest.ini` 
+- [x] 创建 `.env.test`（隔离测试环境变量）
+- [x] 修复 Python 3.9 兼容性：`Mapped[X | None]` → `Mapped[Optional[X]]`（ORM 模型层）
+- [x] 修复 SQLAlchemy async 懒加载问题：改用 `selectinload` 急加载关联关系
+- [x] 降级 `bcrypt==3.2.2` 以兼容 `passlib==1.7.4`
+- [x] **44/44 测试全部通过** ✅
+
+```bash
+# 运行单元 + 集成测试
+make test-local
+# 或：python -m pytest tests/ --ignore=tests/e2e -v
+```
 
 ---
 
@@ -288,6 +315,7 @@ make dev
 | ✅ 完成 | T001 基础架构 | 高 | 低 | 已完成 |
 | P0 🔴 | T002 数据库 ORM 模型 | 高 | 中 | ✅ 已完成 |
 | P0 🔴 | T003 认证与多用户 | 高 | 中 | ✅ 已完成 |
+| ✅ 完成 | T-test 测试框架 | 高 | 中 | ✅ 已完成 (44/44) |
 | P0 🔴 | T004 健康数据录入 | 高 | 低 | ⬜ 未开始 |
 | P0 🔴 | T010 RAG 问答助手 | 高 | 中 | ⬜ 未开始 |
 | P0 🔴 | T012 检验单解读 | 极高 | 中 | ⬜ 未开始 |
