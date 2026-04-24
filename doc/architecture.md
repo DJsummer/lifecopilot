@@ -1,8 +1,9 @@
 # LifePilot — 系统架构设计文档
 
-> 版本：v0.1  
+> 版本：v0.2  
 > 日期：2026-04-24  
-> 状态：进行中
+> 状态：进行中  
+> 变更：第3章技术选型扩展为完整选型理由（含各替代方案对比）
 
 ---
 
@@ -77,47 +78,172 @@ LifePilot 是一套面向家庭的 AI 健康管理系统，核心目标是：
 
 ---
 
-## 3. 技术选型
+## 3. 技术选型与选型理由
 
-### 3.1 后端
+### 3.1 后端框架
 
-| 组件 | 技术 | 选型理由 |
-|------|------|----------|
-| Web 框架 | FastAPI | 原生异步、自动生成 OpenAPI 文档、性能高 |
-| ORM | SQLAlchemy 2.0 (async) | 类型安全、异步支持、与 Alembic 深度集成 |
-| 数据库迁移 | Alembic | 版本化管理表结构，支持回滚 |
-| 配置管理 | pydantic-settings | 类型校验、`.env` 自动加载 |
-| 结构化日志 | structlog | JSON 格式输出，便于日志收集 |
-| 任务队列 | Celery + Redis | 异步任务（报告生成/OCR/通知） |
-| 认证 | JWT (python-jose) | 无状态、适合多端同时登录 |
+#### FastAPI（Web 框架）
 
-### 3.2 数据库
+**选择理由**：
 
-| 数据库 | 用途 | 理由 |
-|--------|------|------|
-| PostgreSQL 16 | 结构化数据（用户/成员/用药/报告） | 关系型、事务完整、UUID 原生支持 |
-| InfluxDB 2.7 | 时序健康指标（血压/心率/血糖等） | 专为时序数据优化，查询聚合高效 |
-| Qdrant | RAG 知识库向量索引 | 高性能向量检索，支持 payload 过滤 |
-| Redis 7 | 缓存 / 会话 / Celery Broker | 低延迟，Celery 官方推荐 |
+- **原生异步**：Python `async/await` 支持，能在等待数据库/LLM 响应时释放线程，适合健康数据录入 + AI 推理并发场景
+- **自动生成 OpenAPI 文档**：`/docs` 开箱即用，前端/移动端联调成本极低
+- **Pydantic 集成**：请求体自动校验，用户输入的血压值、日期等在进入业务逻辑前已完成类型校验，大幅降低注入风险
+- **对比 Django**：Django ORM 不支持异步，且全家桶模式引入大量本项目不需要的模板/Admin 功能；FastAPI 更轻量聚焦
+
+#### SQLAlchemy 2.0 async（ORM）
+
+**选择理由**：
+
+- **防 SQL 注入**：参数化查询自动处理，健康数据属于敏感数据，禁止拼接原始 SQL
+- **类型安全**：Python 类描述表结构，字段拼写错误在 IDE 静态检查阶段即发现，而非运行时
+- **关系导航**：`member.health_records` 直接访问关联数据，无需手写 JOIN
+- **与 Alembic 深度集成**：模型变更只需改 Python 类，Alembic 自动 diff 生成 ALTER TABLE 脚本
+
+#### Alembic（数据库迁移）
+
+**选择理由**：
+
+LifePilot 数据模型会持续演进（MVP → 慢病预测 → RAG → 用药管理），Alembic 相当于数据库表结构的 Git：
+
+```bash
+make db-revision MSG="add spo2 column"  # 自动生成迁移脚本
+make db-migrate                          # 应用到数据库
+alembic downgrade -1                     # 回滚上一步（无需手写 DROP）
+```
+
+生产环境上线新功能时，数据库变更有完整历史记录，出问题可精确回滚，不会丢失用户数据。
+
+#### Celery + Redis（异步任务队列）
+
+**选择理由**：
+
+OCR 识别、LLM 推理、周报生成都是耗时操作（秒级到分钟级），不能阻塞 HTTP 请求：
+
+```
+用户上传检验单 → API 立即返回 202 Accepted
+                → Celery Worker 异步跑 OCR + LLM
+                → 完成后 WebSocket 推送通知
+```
+
+Redis 同时承担 Celery Broker 和结果存储，减少外部依赖数量。
+
+---
+
+### 3.2 数据库选型
+
+#### PostgreSQL 16（结构化数据）
+
+**选择理由**：
+
+| 需求 | PostgreSQL 的支持 |
+|------|------------------|
+| 用户/成员/用药的关系型查询 | 完善的外键、JOIN、事务 |
+| 主键唯一性保证 | UUID 原生支持（`uuid-ossp` 扩展） |
+| 密码安全存储 | `pgcrypto` 提供 bcrypt 函数 |
+| 数据完整性 | 严格的 ACID 事务，健康数据不会半写入 |
+| JSON 字段（LLM 结构化结果） | `JSONB` 类型，支持索引检索 |
+
+**为什么不用 MySQL**：MySQL 对 UUID 主键性能较差，JSON 支持不如 PostgreSQL 完善；PostgreSQL 在复杂查询和扩展性上更优。
+
+#### InfluxDB 2.7（时序健康数据）
+
+**选择理由**：
+
+健康指标（血压/血糖/心率/步数）本质是时序数据，有特殊查询模式：
+
+- "过去 30 天每日平均血压" → 时间范围聚合
+- "血压趋势是否在上升" → 滑动窗口分析
+- "连续 7 天步数低于 5000 步" → 条件告警
+
+这类查询在 PostgreSQL 中需要复杂 SQL + 额外索引，而 InfluxDB 专为此设计，Flux 查询语言一行搞定：
+
+```flux
+from(bucket: "health_metrics")
+  |> range(start: -30d)
+  |> filter(fn: (r) => r["metric_type"] == "blood_pressure_sys")
+  |> aggregateWindow(every: 1d, fn: mean)
+  |> movingAverage(n: 7)
+```
+
+**职责分离**：PostgreSQL 存"某次测量的元数据"（谁测的、用什么设备），InfluxDB 存"时间序列的数值流"，各司其职。
+
+#### Qdrant（向量数据库）
+
+**选择理由**：
+
+RAG 问答助手需要在健康知识库中快速找到与用户问题最相关的文档片段，这是向量相似度检索场景。
+
+**为什么不用 pgvector（PostgreSQL 扩展）**：
+
+| | Qdrant | pgvector |
+|-|--------|---------|
+| 实现语言 | Rust（高性能） | C（PostgreSQL 扩展） |
+| 大规模检索 | HNSW 专用索引，百万向量毫秒级响应 | 混在关系型负载中，互相竞争资源 |
+| Payload 过滤 | **在 HNSW 索引内部同时过滤**，精度不打折 | 先检索再 WHERE 过滤，召回率下降 |
+| 独立扩展 | 向量库可单独扩展内存/CPU | 与主库绑定，难以独立扩容 |
+
+**Payload 过滤是关键**：用户问"血糖偏高吃什么"时，应只检索营养类文档，而不是在全库搜索后再过滤：
+
+```python
+results = client.search(
+    collection_name="health_knowledge",
+    query_vector=embedding,
+    query_filter=Filter(
+        must=[FieldCondition(key="category", match=MatchValue(value="nutrition"))]
+    ),
+    limit=5
+)
+```
+
+**为什么不用 Pinecone（云托管）**：健康知识库属于自建数据资产，且医疗类数据有隐私合规要求，不适合上传到第三方 SaaS，Qdrant 自托管完全数据自主。
+
+**为什么不用 Chroma**：Chroma 定位是开发调试工具，Qdrant 才是面向生产的独立服务；本项目需要长期稳定运行。
+
+#### Redis 7（缓存 / 会话 / 消息队列）
+
+**选择理由**：
+
+- **Celery Broker**：Celery 官方推荐，任务投递低延迟，ACK 机制保证任务不丢失
+- **对话历史缓存**：RAG 问答的多轮历史存 Redis（TTL 30天），比数据库查询快 10-100 倍
+- **JWT 黑名单**：用户登出后将 token 加入 Redis 黑名单，实现即时失效
+- **一库多用**：一个 Redis 实例同时承担三种职责，减少运维复杂度
+
+---
 
 ### 3.3 AI 组件
 
-| 组件 | 技术 | 用途 |
-|------|------|------|
-| LLM | GPT-4o / Qwen（可配置） | 报告解读、症状分析、食谱生成 |
-| Embedding | text-embedding-3-small | 知识库文本向量化 |
-| RAG 框架 | LangChain | Pipeline 编排、文档检索 |
-| OCR | PaddleOCR | 检验单/药盒图片文字识别 |
-| 多模态 | GPT-4o Vision | 皮肤/伤口照片辅助分析 |
+| 组件 | 技术 | 选型理由 |
+|------|------|----------|
+| LLM | GPT-4o / Qwen（可配置） | 通过环境变量切换，国内可用 Qwen 降低成本，接口兼容 OpenAI SDK |
+| Embedding | text-embedding-3-small | 性价比最优，1536 维，中文支持好，成本约为 large 的 1/5 |
+| RAG 框架 | LangChain | 成熟的 Pipeline 编排，内置文档分块/检索/历史管理，社区活跃 |
+| OCR | PaddleOCR | 百度开源，中文检验单识别准确率业界领先，本地运行无 API 费用 |
+| 多模态 | GPT-4o Vision | 皮肤/伤口照片分析，多模态理解能力目前最强 |
+
+---
 
 ### 3.4 基础设施
 
-| 组件 | 技术 | 说明 |
-|------|------|------|
-| 容器化 | Docker + Docker Compose | 多阶段构建，dev/prod 分离 |
-| 热更新 | uvicorn `--reload` + volume 挂载 | 开发时代码改动秒生效 |
-| 反向代理 | Nginx | TLS、限流、静态资源 |
-| CI/CD | 待定（GitHub Actions） | 自动测试、镜像构建、部署 |
+#### Docker 多阶段构建
+
+**选择理由**：开发和生产环境保持一致，消除"在我电脑上能跑"问题；多阶段构建使生产镜像不含开发工具，体积更小、攻击面更小。
+
+**热更新方案**：
+```yaml
+# docker-compose.dev.yml
+volumes:
+  - ./src:/app/src   # 挂载源码到容器
+command: uvicorn src.main:app --reload --reload-dir /app/src
+```
+代码保存 → uvicorn 检测文件变更 → 自动重启，无需重新 build 镜像，开发体验与本地无异。
+
+#### Nginx（反向代理）
+
+**选择理由**：
+- TLS 终止：证书管理在 Nginx 层统一处理，应用层无需关心 HTTPS
+- 限流：`limit_req_zone` 防止 API 滥用（LLM 调用成本高，需严格限流）
+- 静态资源：前端构建产物直接由 Nginx 服务，不占用 FastAPI 进程
 
 ---
 
