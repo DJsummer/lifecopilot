@@ -57,9 +57,10 @@ class Member(BaseModel):
     medications: Mapped[list["Medication"]] = relationship(back_populates="member", cascade="all, delete-orphan")
     symptom_logs: Mapped[list["SymptomLog"]] = relationship(back_populates="member", cascade="all, delete-orphan")
     lab_reports: Mapped[list["LabReport"]] = relationship(back_populates="member", cascade="all, delete-orphan")
+    health_reports: Mapped[list["HealthReport"]] = relationship(back_populates="member", cascade="all, delete-orphan")
 
 
 # 避免循环导入，延迟引用
 from src.models.health import HealthRecord, SymptomLog  # noqa: E402
 from src.models.medication import Medication  # noqa: E402
-from src.models.report import LabReport  # noqa: E402
+from src.models.report import LabReport, HealthReport  # noqa: E402
