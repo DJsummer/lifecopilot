@@ -93,8 +93,19 @@ import-json:   ## 从 JSON 批量导入知识文章 (FILE=data/xxx.json)
 import-dir:    ## 导入整个目录的文档 (DIR=docs/ SOURCE=丁香医生 CATEGORY=内科)
 	python scripts/import_knowledge.py --dir $(DIR) --source "$(SOURCE)" --category "$(CATEGORY)" --qdrant-host localhost
 
-import-sample: ## 导入内置示例医学文章（用于快速测试）
+import-sample: ## 导入示例疾病科普文章（disease 类别，用于快速测试）
 	python scripts/import_knowledge.py --json data/sample_articles.json --qdrant-host localhost
+
+import-red-flag: ## 导入20条红旗症状库（red_flag 类别，check_red_flag 工具使用）
+	python scripts/import_knowledge.py --json data/red_flag_symptoms.json --qdrant-host localhost
+
+import-triage: ## 导入分诊导诊库（triage 类别，get_triage 工具使用）
+	python scripts/import_knowledge.py --json data/triage_guide.json --qdrant-host localhost
+
+import-all-knowledge: ## 一键导入三库（disease + red_flag + triage）
+	python scripts/import_knowledge.py --json data/sample_articles.json --qdrant-host localhost
+	python scripts/import_knowledge.py --json data/red_flag_symptoms.json --qdrant-host localhost
+	python scripts/import_knowledge.py --json data/triage_guide.json --qdrant-host localhost
 
 dxy-crawl:     ## 抓取丁香医生文章并保存 (URL_FILE=data/dxy_urls.txt OUT=data/dxy_articles.json)
 	python scripts/dxy_crawler.py --url-file $(URL_FILE) --output $(OUT)
