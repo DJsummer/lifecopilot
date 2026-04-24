@@ -253,7 +253,7 @@ class KnowledgeService:
 
         category 推荐值：
           - "disease"   通用疾病科普（默认）
-          - "red_flag"  紧急症状/红旗症状（触发则直接提示就医）
+          - "red_flag"  紧急症状/危险症状（触发则直接提示就医）
           - "triage"    分诊导诊（判断挂哪个科室）
           - "drug"      药物说明
           - "general"   其他

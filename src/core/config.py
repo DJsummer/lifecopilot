@@ -72,6 +72,10 @@ class Settings(BaseSettings):
     RERANKER_MODEL: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
     QUERY_CACHE_TTL: int = 300             # 查询结果缓存 5 分钟（Redis）
 
+    # 文件上传（检验单）
+    UPLOAD_DIR: str = "/app/uploads"
+    MAX_FILE_SIZE_MB: int = 20
+
 
 @lru_cache
 def get_settings() -> Settings:

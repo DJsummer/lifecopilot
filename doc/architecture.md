@@ -1,9 +1,9 @@
 # LifePilot — 系统架构设计文档
 
-> 版本：v0.4  
+> 版本：v0.5  
 > 日期：2026-04-24  
 > 状态：进行中  
-> 变更：前端选型确定（微信小程序 + Flutter + Web 管理后台），新增 T023 任务
+> 变更：T012 完成（检验单 AI 解读）：OCR + LLM 结构化解读 + 异常标注 + 趋势对比 API，102 个测试全部通过
 
 ---
 
@@ -418,11 +418,13 @@ GET    /api/v1/health/{member_id}/summary            各指标统计摘要（最
 | steps | 步 | 0 | 200000 |
 | sleep_hours | h | 0 | 24 |
 
-#### 检验单
+#### 检验单 AI 解读（✅ 已完成 T012）
 ```
-POST   /api/v1/members/{id}/reports   上传检验单（图片/PDF）→ 触发 OCR + LLM 解读
-GET    /api/v1/members/{id}/reports   报告列表
-GET    /api/v1/members/{id}/reports/{rid}  报告详情（含 LLM 解读）
+POST   /api/v1/lab-reports/{member_id}/upload           上传检验单（JPG/PNG/PDF/TXT）+ AI 解读
+GET    /api/v1/lab-reports/{member_id}                  报告列表（按类型过滤）
+GET    /api/v1/lab-reports/{member_id}/{report_id}      报告详情（含结构化项目）
+DELETE /api/v1/lab-reports/{member_id}/{report_id}      删除报告
+GET    /api/v1/lab-reports/{member_id}/compare          异常项趋势对比
 ```
 
 #### 用药管理

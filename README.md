@@ -2,6 +2,8 @@
 
 > 用 AI 技术帮助家庭轻松管理健康，让每个成员都有自己的智能健康助理。
 
+[English](README_EN.md)
+
 [![Python](https://img.shields.io/badge/Python-3.9-blue)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.4.0-green)](https://fastapi.tiangolo.com)
 [![Tests](https://img.shields.io/badge/Tests-82%2F82-brightgreen)](#测试)
@@ -18,10 +20,10 @@
 | 📊 健康数据录入 | ✅ 已完成 | 血压/血糖/体重/心率等 10 种指标，CSV 批量导入 |
 | 💬 健康 RAG 问答助手 | ✅ 已完成 v3 | OpenAI Tool Calling 三工具 + 多成员记忆隔离 |
 | 📚 健康知识库 | ✅ 已完成 | disease / red_flag / triage 三分区，支持批量导入 |
+| 🔬 检验单 AI 解读 | ✅ 已完成 v1 | OCR + LLM 结构化解读 + 异常趋势对比 |
 | 📱 微信小程序 | ⬜ 计划中 | 日常用户端（uni-app），血压录入/问诊/检验单 |
 | 📱 Flutter App | ⬜ 计划中 | iOS/Android，适配老人大字体 UI |
 | 💻 Web 管理后台 | ⬜ 计划中 | React + Ant Design Pro，家庭健康总览 / 异常预警 |
-| 🔬 检验单 AI 解读 | ⬜ 计划中 | OCR 识别 + LLM 通俗解释异常项 |
 | 💊 用药管理提醒 | ⬜ 计划中 | 智能提醒 + 依从性追踪 |
 | 📈 慢病趋势预测 | ⬜ 计划中 | 时序模型预警血压/血糖异常趋势 |
 | 📝 健康周报/月报 | ⬜ 计划中 | 自动生成家庭健康趋势报告 |
@@ -38,7 +40,7 @@
    ▼
 Round 1 — LLM 自主决定调用哪些工具（tool_choice=auto）
    │
-   ├─► check_red_flag   → 搜索红旗症状库（20条紧急症状）
+   ├─► check_red_flag   → 搜索危险症状库（20条紧急症状）
    │                       分数>阈值 → 提示立即就医/拨打120
    ├─► get_triage       → 搜索分诊导诊库（11个科室指南）
    │                       "挂什么科/看哪个科" 等问题
@@ -133,11 +135,11 @@ make db-migrate
 ### 5. 导入健康知识库（三库一键导入）
 
 ```bash
-# 导入示例数据（disease 科普 + red_flag 红旗症状 + triage 分诊导诊）
+# 导入示例数据（disease 科普 + red_flag 危险症状 + triage 分诊导诊）
 make import-all-knowledge
 
 # 或分开导入
-make import-red-flag    # 红旗症状库（20条紧急症状）
+make import-red-flag    # 危险症状库（20条紧急症状）
 make import-triage      # 分诊导诊库（11个科室指南）
 make import-sample      # 疾病科普库（示例文章）
 
@@ -211,7 +213,7 @@ make db-shell         # 进入 PostgreSQL 终端
 
 # 知识库
 make import-all-knowledge   # 一键导入三库（disease/red_flag/triage）
-make import-red-flag        # 仅导入红旗症状库
+make import-red-flag        # 仅导入危险症状库
 make import-triage          # 仅导入分诊导诊库
 make import-sample          # 仅导入疾病科普示例
 
@@ -277,7 +279,7 @@ lifecopilot/
 │   │   └── embedding_service.py   # Embedding 抽象层（OpenAI / bge-m3）
 │   └── workers/                   # Celery 异步任务
 ├── data/
-│   ├── red_flag_symptoms.json     # 红旗症状库（20条）
+│   ├── red_flag_symptoms.json     # 危险症状库（20条）
 │   ├── triage_guide.json          # 分诊导诊库（11条）
 │   ├── sample_articles.json       # 疾病科普示例（5条）
 │   └── dxy_urls.txt               # 丁香医生文章 URL 列表
@@ -303,11 +305,11 @@ lifecopilot/
 | 阶段零：Docker 部署基础设施 | ✅ 已完成 | 100% |
 | 阶段一：基础架构搭建 | ✅ 已完成 | 100% |
 | 阶段二：核心健康监测 | 🔄 进行中 | 15%（健康数据录入已完成）|
-| 阶段三：智能问诊助手（RAG） | 🔄 进行中 | 60%（知识库+Tool Calling问答已完成）|
+| 阶段三：智能问诊助手（RAG） | 🔄 进行中 | 70%（知识库+Tool Calling问答+检验单解读已完成）|
 | 阶段四：生活方式干预 | ⬜ 未开始 | 0% |
 | 阶段五～七：前端/报告/部署 | ⬜ 未开始 | 0% |
 
-**下一步（优先级 P0）**：T012 检验单 AI 解读（OCR + LLM + LabReport 模型）
+**下一步（优先级 P1）**：T020 用药管理 / T018 健康周报
 
 ---
 
