@@ -496,33 +496,54 @@ Celery 异步任务
       └── 结果写回 lab_reports 表 → WebSocket 推送通知前端
 ```
 
-### 6.2 RAG 问答流程
+### 6.2 RAG 问答流程（✅ 已实现 T009/T010）
 
 ```
 用户提问
       │
       ▼
-安全过滤（健康领域外问题拒绝）
+安全过滤（敏感词拦截 + 非健康类问题拒绝）
       │
       ▼
-Embedding（text-embedding-3-small）
+Embedding（OpenAI text-embedding-3-small）
       │
       ▼
-Qdrant 向量检索（top-k=5）
+Qdrant 向量检索（top_k 可配置，默认 4）
+  - 返回最相似的健康知识片段
+  - 可按 category 过滤（内科/儿科等）
       │
       ▼
-构建 Prompt:
-  [系统] 你是家庭健康助手，仅根据以下资料回答...
-  [知识] {检索到的文档片段}
-  [历史] {多轮对话历史}
-  [用户] {当前问题}
+构建 RAG Prompt:
+  [system] LifePilot 家庭健康助手角色设定 + 免责声明
+  [system] 成员健康背景（可选）
+  [知识]   检索到的文档片段（含来源引用）
+  [历史]   多轮对话历史（最近 10 轮）
+  [user]   当前用户问题
+      │
+      ├── 同步模式: POST /api/v1/chat/
+      │         → 完整回答一次性返回
+      │
+      └── 流式模式: POST /api/v1/chat/stream
+                → SSE 逐 token 推送，前端实时展示
       │
       ▼
-LLM 生成回答（附带知识来源引用）
-      │
-      ▼
-存储对话历史（Redis，TTL 30天）
+返回：answer + sources（知识来源列表）+ session_id
+
+会话管理：内存存储（最大 10000 会话，LRU 淘汰）
+           生产环境建议迁移至 Redis（TTL 30天）
 ```
+
+**知识库管理 API**（仅 admin）：
+```
+POST   /api/v1/chat/knowledge       摄入文档（分块 + Embedding + 存入 Qdrant）
+DELETE /api/v1/chat/knowledge/{src} 删除指定来源所有向量
+GET    /api/v1/chat/knowledge/stats 知识库统计（向量数/点数/状态）
+```
+
+**文本分块策略**：
+- 编码器：`cl100k_base`（GPT-4/Embedding 通用）
+- 默认 chunk_size：512 tokens，overlap：64 tokens
+- 使用 MD5 哈希作为 Qdrant Point ID，支持幂等 upsert
 
 ### 6.3 异常阈值预警规则
 
@@ -711,7 +732,7 @@ Dashboard    → 家庭全员关键指标卡片 + 近期异常列表
 | 集成测试 | pytest + httpx AsyncClient | 所有 API 端点 | ✅ 31 用例 |
 | E2E 测试 | Selenium + Chrome | Web Admin 登录/Dashboard | 🔄 框架就绪 |
 
-**当前通过率：61/61（100%）**
+**当前通过率：82/82（100%）**
 
 ### 11.2 测试基础设施
 

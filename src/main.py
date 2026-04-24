@@ -9,6 +9,7 @@ from src.core.config import settings
 from src.core.logging import setup_logging
 from src.api.v1.routers import auth
 from src.api.v1.routers import health as health_router
+from src.api.v1.routers import chat as chat_router
 
 log = structlog.get_logger()
 
@@ -23,7 +24,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="LifePilot — 家庭健康管理 API",
-    version="0.3.0",
+    version="0.4.0",
     docs_url="/docs" if settings.DEBUG else None,
     redoc_url="/redoc" if settings.DEBUG else None,
     lifespan=lifespan,
@@ -46,4 +47,5 @@ async def health():
 # ── 路由注册 ──────────────────────────────────────────────────────────
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(health_router.router, prefix="/api/v1/health", tags=["health"])
+app.include_router(chat_router.router, prefix="/api/v1/chat", tags=["chat"])
 
