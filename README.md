@@ -6,7 +6,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.9-blue)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.4.0-green)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/Tests-82%2F82-brightgreen)](#测试)
+[![Tests](https://img.shields.io/badge/Tests-125%2F125-brightgreen)](#测试)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://docs.docker.com/compose/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -21,13 +21,8 @@
 | 💬 健康 RAG 问答助手 | ✅ 已完成 v3 | OpenAI Tool Calling 三工具 + 多成员记忆隔离 |
 | 📚 健康知识库 | ✅ 已完成 | disease / red_flag / triage 三分区，支持批量导入 |
 | 🔬 检验单 AI 解读 | ✅ 已完成 v1 | OCR + LLM 结构化解读 + 异常趋势对比 |
-| 📱 微信小程序 | ⬜ 计划中 | 日常用户端（uni-app），血压录入/问诊/检验单 |
-| 📱 Flutter App | ⬜ 计划中 | iOS/Android，适配老人大字体 UI |
-| 💻 Web 管理后台 | ⬜ 计划中 | React + Ant Design Pro，家庭健康总览 / 异常预警 |
-| 💊 用药管理提醒 | ⬜ 计划中 | 智能提醒 + 依从性追踪 |
+| � 用药管理提醒 | ✅ 已完成 v1 | LLM 药物说明 + 依从性记录 + 相互作用检查 |
 | 📈 慢病趋势预测 | ⬜ 计划中 | 时序模型预警血压/血糖异常趋势 |
-| 📝 健康周报/月报 | ⬜ 计划中 | 自动生成家庭健康趋势报告 |
-
 ---
 
 ## RAG 问答助手架构（v3）
@@ -195,6 +190,32 @@ PATCH  /api/v1/auth/family/members/{id}   更新成员信息
 DELETE /api/v1/auth/family/members/{id}   删除成员（admin）
 ```
 
+### 检验单 AI 解读
+
+```
+POST   /api/v1/lab-reports/{member_id}/upload         上传检验单（JPG/PNG/PDF/TXT）+ AI 解读
+GET    /api/v1/lab-reports/{member_id}                报告列表（按类型过滤）
+GET    /api/v1/lab-reports/{member_id}/{report_id}    报告详情
+DELETE /api/v1/lab-reports/{member_id}/{report_id}    删除报告
+GET    /api/v1/lab-reports/{member_id}/compare        异常项趋势对比
+```
+
+### 用药管理
+
+```
+POST   /api/v1/medications/{member_id}                          新增用药方案（含 LLM 自动说明）
+GET    /api/v1/medications/{member_id}                          用药方案列表（按 status 过滤）
+GET    /api/v1/medications/{member_id}/{med_id}                 用药方案详情
+PATCH  /api/v1/medications/{member_id}/{med_id}                 更新用药方案
+DELETE /api/v1/medications/{member_id}/{med_id}                 删除用药方案
+POST   /api/v1/medications/{member_id}/{med_id}/reminders       添加提醒时间
+DELETE /api/v1/medications/{member_id}/{med_id}/reminders/{rid} 删除提醒时间
+POST   /api/v1/medications/{member_id}/{med_id}/adherence       记录服药依从性
+GET    /api/v1/medications/{member_id}/{med_id}/adherence       依从性记录列表
+GET    /api/v1/medications/{member_id}/{med_id}/adherence/stats 依从性统计（按时率）
+POST   /api/v1/medications/{member_id}/interaction-check        多药物相互作用风险检查
+```
+
 ---
 
 ## 常用命令
@@ -238,7 +259,7 @@ pip install -r requirements-test.txt
 python -m pytest tests/ --ignore=tests/e2e -v
 ```
 
-**测试状态：82/82 通过 ✅**
+**测试状态：125/125 通过 ✅**
 
 | 测试文件 | 内容 | 数量 |
 |----------|------|------|
@@ -247,6 +268,8 @@ python -m pytest tests/ --ignore=tests/e2e -v
 | `test_members.py` | 家庭成员 CRUD | 15 |
 | `test_health.py` | 健康数据录入/查询/CSV 导入 | 17 |
 | `test_chat.py` | RAG 问答/工具/知识库 API | 21 |
+| `test_lab_report.py` | 检验单上传/AI 解读/趋势 | 20 |
+| `test_medication.py` | 用药管理/依从性/相互作用 | 23 |
 | `test_system.py` | 健康检查 | 2 |
 
 ---
@@ -309,7 +332,7 @@ lifecopilot/
 | 阶段四：生活方式干预 | ⬜ 未开始 | 0% |
 | 阶段五～七：前端/报告/部署 | ⬜ 未开始 | 0% |
 
-**下一步（优先级 P1）**：T020 用药管理 / T018 健康周报
+**下一步（优先级 P1）**：T018 健康周报
 
 ---
 

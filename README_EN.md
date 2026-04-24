@@ -3,8 +3,8 @@
 > AI-powered health management for the whole family — every member gets their own intelligent health assistant.
 
 [![Python](https://img.shields.io/badge/Python-3.9-blue)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.5.0-green)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/Tests-102%2F102-brightgreen)](#testing)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.6.0-green)](https://fastapi.tiangolo.com)
+[![Tests](https://img.shields.io/badge/Tests-125%2F125-brightgreen)](#testing)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://docs.docker.com/compose/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -21,10 +21,7 @@
 | 💬 Health RAG Chatbot | ✅ Done v3 | OpenAI Tool Calling (3 tools) + per-member memory isolation |
 | 📚 Health Knowledge Base | ✅ Done | 3-partition Qdrant store: `disease` / `red_flag` / `triage` |
 | 🔬 Lab Report AI Interpretation | ✅ Done v1 | OCR + LLM structured analysis + abnormal trend comparison |
-| 📱 WeChat Mini-Program | ⬜ Planned | Daily user client (uni-app) |
-| 📱 Flutter App | ⬜ Planned | iOS / Android, elder-friendly large-font UI |
-| 💻 Web Admin Dashboard | ⬜ Planned | React + Ant Design Pro, family health overview |
-| 💊 Medication Management | ⬜ Planned | Smart reminders + adherence tracking |
+| � Medication Management | ✅ Done v1 | LLM drug explanation + adherence tracking + interaction check |
 | 📈 Chronic Disease Prediction | ⬜ Planned | Time-series model for BP / glucose trend alerts |
 | 📝 Weekly / Monthly Reports | ⬜ Planned | Auto-generated family health trend reports |
 
@@ -247,7 +244,7 @@ pip install -r requirements-test.txt
 python -m pytest tests/ --ignore=tests/e2e -v
 ```
 
-**Test status: 102 / 102 passing ✅**
+**Test status: 125 / 125 passing ✅**
 
 | Test file | Coverage | Count |
 |-----------|----------|-------|
@@ -257,6 +254,7 @@ python -m pytest tests/ --ignore=tests/e2e -v
 | `test_health.py` | Health data entry / query / CSV import | 17 |
 | `test_chat.py` | RAG chatbot / tool calling / knowledge API | 21 |
 | `test_lab_report.py` | Lab report upload / AI interpretation / trend | 20 |
+| `test_medication.py` | Medication management / adherence / interactions | 23 |
 | `test_system.py` | Health check | 2 |
 
 ---
@@ -320,7 +318,7 @@ See [TASKS.md](TASKS.md) for full details.
 | Phase 4: Lifestyle intervention | ⬜ Not started | 0% |
 | Phases 5–7: Frontend / reports / deployment | ⬜ Not started | 0% |
 
-**Next up (P1)**: T020 Medication Management / T018 Weekly Health Report
+**Next up (P1)**: T018 Weekly Health Report
 
 ---
 
