@@ -15,6 +15,7 @@ from src.api.v1.routers import medication as medication_router
 from src.api.v1.routers import report as report_router
 from src.api.v1.routers import visit as visit_router
 from src.api.v1.routers import symptom as symptom_router
+from src.api.v1.routers import mental_health as mental_health_router
 
 log = structlog.get_logger()
 
@@ -29,7 +30,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="LifePilot — 家庭健康管理 API",
-    version="0.9.0",
+    version="1.0.0",
     docs_url="/docs" if settings.DEBUG else None,
     redoc_url="/redoc" if settings.DEBUG else None,
     lifespan=lifespan,
@@ -58,4 +59,5 @@ app.include_router(medication_router.router, prefix="/api/v1/medications", tags=
 app.include_router(report_router.router, prefix="/api/v1/reports", tags=["reports"])
 app.include_router(visit_router.router, prefix="/api/v1/visit", tags=["visit"])
 app.include_router(symptom_router.router, prefix="/api/v1/symptoms", tags=["symptoms"])
+app.include_router(mental_health_router.router, prefix="/api/v1/mental-health", tags=["mental-health"])
 

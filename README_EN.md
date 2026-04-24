@@ -3,8 +3,8 @@
 > AI-powered health management for the whole family — every member gets their own intelligent health assistant.
 
 [![Python](https://img.shields.io/badge/Python-3.9-blue)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.9.0-green)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/Tests-187%2F187-brightgreen)](#testing)
+[![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-green)](https://fastapi.tiangolo.com)
+[![Tests](https://img.shields.io/badge/Tests-214%2F214-brightgreen)](#testing)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://docs.docker.com/compose/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -24,8 +24,9 @@
 | 📊 Medication Management | ✅ Done v1 | LLM drug explanation + adherence tracking + interaction check |
 | 📈 Weekly / Monthly Reports | ✅ Done v1 | LLM summary + metric stats + adherence overview + notable events |
 | 🏥 Pre-Visit Assistant | ✅ Done v1 | Structured visit summary (ZH/EN) + auto-aggregated medication / metrics / lab snapshots |
-| � Symptom Diary NLP | ✅ Done v1 | LLM symptom extraction + severity score (1-10) + visit advice level |
-| �📈 Chronic Disease Prediction | ⬜ Planned | Time-series model for BP / glucose trend alerts |
+| 📝 Symptom Diary NLP | ✅ Done v1 | LLM symptom extraction + severity score (1-10) + visit advice level |
+| 🧠 Mental Health Screening | ✅ Done v1 | PHQ-9/GAD-7 scoring + emotion diary NLP + risk alert + intervention resources |
+| 📈 Chronic Disease Prediction | ⬜ Planned | Time-series model for BP / glucose trend alerts |
 
 ---
 
@@ -246,7 +247,7 @@ pip install -r requirements-test.txt
 python -m pytest tests/ --ignore=tests/e2e -v
 ```
 
-**Test status: 187 / 187 passing ✅**
+**Test status: 214 / 214 passing ✅**
 
 | Test file | Coverage | Count |
 |-----------|----------|-------|
@@ -260,6 +261,7 @@ python -m pytest tests/ --ignore=tests/e2e -v
 | `test_report.py` | Weekly/monthly report generate / list / detail / delete | 21 |
 | `test_visit.py` | Pre-visit summary generate / list / detail / delete | 21 |
 | `test_symptom.py` | Symptom diary NLP / list / detail / delete | 20 |
+| `test_mental_health.py` | PHQ-9/GAD-7 scoring + emotion diary NLP | 27 |
 | `test_system.py` | Health check | 2 |
 
 ---
@@ -301,7 +303,7 @@ lifecopilot/
 │   ├── import_knowledge.py        # Bulk import tool (JSON / directory / single file / PDF)
 │   └── dxy_crawler.py             # DXY article crawler (polite rate-limit, personal study use)
 ├── alembic/                       # Database migration scripts
-├── tests/                         # pytest test suite (102 cases)
+├── tests/                         # pytest test suite (214 cases)
 ├── docker/                        # Per-service Docker configs
 ├── doc/architecture.md            # System architecture design document
 ├── Makefile                       # Shortcut commands

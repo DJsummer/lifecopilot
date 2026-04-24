@@ -5,8 +5,8 @@
 [English](README_EN.md)
 
 [![Python](https://img.shields.io/badge/Python-3.9-blue)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.9.0-green)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/Tests-187%2F187-brightgreen)](#测试)
+[![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-green)](https://fastapi.tiangolo.com)
+[![Tests](https://img.shields.io/badge/Tests-214%2F214-brightgreen)](#测试)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://docs.docker.com/compose/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -21,7 +21,13 @@
 | 💬 健康 RAG 问答助手 | ✅ 已完成 v3 | OpenAI Tool Calling 三工具 + 多成员记忆隔离 |
 | 📚 健康知识库 | ✅ 已完成 | disease / red_flag / triage 三分区，支持批量导入 |
 | 🔬 检验单 AI 解读 | ✅ 已完成 v1 | OCR + LLM 结构化解读 + 异常趋势对比 |
-| � 用药管理提醒 | ✅ 已完成 v1 | LLM 药物说明 + 依从性记录 + 相互作用检查 || 📈 健康周报/月报 | ✅ 已完成 v1 | LLM 总结 + 指标统计 + 依从性汇总 + 异常事件提取 || 📈 慢病趋势预测 | ⬜ 计划中 | 时序模型预警血压/血糖异常趋势 |
+| 💊 用药管理提醒 | ✅ 已完成 v1 | LLM 药物说明 + 依从性记录 + 相互作用检查 |
+| 📈 健康周报/月报 | ✅ 已完成 v1 | LLM 总结 + 指标统计 + 依从性汇总 + 异常事件提取 |
+| 🗒️ 就医准备助手 | ✅ 已完成 | LLM 生成中/英文就诊摘要 + 自动聊天快照 |
+| 📝 症状日记 NLP 分析 | ✅ 已完成 | LLM 结构化提取症状 + 严重度评分 + 就医建议 |
+| 🧠 心理健康筛查 | ✅ 已完成 | PHQ-9/GAD-7 评分 + 情绪日记 NLP + 风险预警 + 干预资源 |
+| 📈 慢病趋势预测 | ⬜ 计划中 | 时序模型预警血压/血糖异常趋势 |
+
 ---
 
 ## RAG 问答助手架构（v3）
@@ -225,6 +231,21 @@ POST   /api/v1/visit/{member_id}                              生成就诊摘要
 GET    /api/v1/visit/{member_id}                              摘要历史列表
 GET    /api/v1/visit/{member_id}/{visit_id}                   摘要详情（全快照 + LLM 文本）
 DELETE /api/v1/visit/{member_id}/{visit_id}                   删除摘要
+
+# 症状日记 NLP 分析（T011）
+POST   /api/v1/symptoms/{member_id}               记录症状日记并 LLM 分析
+GET    /api/v1/symptoms/{member_id}               症状日记列表（可按 advice_level 过滤）
+GET    /api/v1/symptoms/{member_id}/{log_id}       症状日记详情
+DELETE /api/v1/symptoms/{member_id}/{log_id}       删除症状日记
+
+# 心理健康筛查（T016）
+GET    /api/v1/mental-health/phq9/questions        获取 PHQ-9 抑郁自评量表 9 题
+GET    /api/v1/mental-health/gad7/questions        获取 GAD-7 广泛性焦虑量表 7 题
+POST   /api/v1/mental-health/{member_id}/diary     记录情绪日记（LLM NLP 分析）
+POST   /api/v1/mental-health/{member_id}/assess    提交 PHQ-9/GAD-7 答案并评分
+GET    /api/v1/mental-health/{member_id}           心理健康记录列表（可按 risk_level 过滤）
+GET    /api/v1/mental-health/{member_id}/{log_id}  记录详情
+DELETE /api/v1/mental-health/{member_id}/{log_id}  删除记录
 ```
 
 ---
@@ -270,7 +291,7 @@ pip install -r requirements-test.txt
 python -m pytest tests/ --ignore=tests/e2e -v
 ```
 
-**测试状态：187/187 通过 ✅**
+**测试状态：214/214 通过 ✅**
 
 | 测试文件 | 内容 | 数量 |
 |----------|------|------|
@@ -284,6 +305,7 @@ python -m pytest tests/ --ignore=tests/e2e -v
 | `test_report.py` | 周报/月报生成/列表/详情/删除 | 21 |
 | `test_visit.py` | 就医准备摘要生成/列表/详情/删除 | 21 |
 | `test_symptom.py` | 症状日记 NLP 分析/列表/详情/删除 | 20 |
+| `test_mental_health.py` | PHQ-9/GAD-7 量表评分 + 情绪日记 NLP | 27 |
 | `test_system.py` | 健康检查 | 2 |
 
 ---
