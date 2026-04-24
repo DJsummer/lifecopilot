@@ -3,8 +3,8 @@
 > AI-powered health management for the whole family — every member gets their own intelligent health assistant.
 
 [![Python](https://img.shields.io/badge/Python-3.9-blue)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.8.0-green)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/Tests-167%2F167-brightgreen)](#testing)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.9.0-green)](https://fastapi.tiangolo.com)
+[![Tests](https://img.shields.io/badge/Tests-187%2F187-brightgreen)](#testing)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://docs.docker.com/compose/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -24,7 +24,8 @@
 | 📊 Medication Management | ✅ Done v1 | LLM drug explanation + adherence tracking + interaction check |
 | 📈 Weekly / Monthly Reports | ✅ Done v1 | LLM summary + metric stats + adherence overview + notable events |
 | 🏥 Pre-Visit Assistant | ✅ Done v1 | Structured visit summary (ZH/EN) + auto-aggregated medication / metrics / lab snapshots |
-| 📈 Chronic Disease Prediction | ⬜ Planned | Time-series model for BP / glucose trend alerts |
+| � Symptom Diary NLP | ✅ Done v1 | LLM symptom extraction + severity score (1-10) + visit advice level |
+| �📈 Chronic Disease Prediction | ⬜ Planned | Time-series model for BP / glucose trend alerts |
 
 ---
 
@@ -245,7 +246,7 @@ pip install -r requirements-test.txt
 python -m pytest tests/ --ignore=tests/e2e -v
 ```
 
-**Test status: 167 / 167 passing ✅**
+**Test status: 187 / 187 passing ✅**
 
 | Test file | Coverage | Count |
 |-----------|----------|-------|
@@ -258,6 +259,7 @@ python -m pytest tests/ --ignore=tests/e2e -v
 | `test_medication.py` | Medication management / adherence / interactions | 23 |
 | `test_report.py` | Weekly/monthly report generate / list / detail / delete | 21 |
 | `test_visit.py` | Pre-visit summary generate / list / detail / delete | 21 |
+| `test_symptom.py` | Symptom diary NLP / list / detail / delete | 20 |
 | `test_system.py` | Health check | 2 |
 
 ---

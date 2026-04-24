@@ -5,8 +5,8 @@
 [English](README_EN.md)
 
 [![Python](https://img.shields.io/badge/Python-3.9-blue)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.8.0-green)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/Tests-167%2F167-brightgreen)](#测试)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.9.0-green)](https://fastapi.tiangolo.com)
+[![Tests](https://img.shields.io/badge/Tests-187%2F187-brightgreen)](#测试)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://docs.docker.com/compose/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -270,7 +270,7 @@ pip install -r requirements-test.txt
 python -m pytest tests/ --ignore=tests/e2e -v
 ```
 
-**测试状态：167/167 通过 ✅**
+**测试状态：187/187 通过 ✅**
 
 | 测试文件 | 内容 | 数量 |
 |----------|------|------|
@@ -283,6 +283,7 @@ python -m pytest tests/ --ignore=tests/e2e -v
 | `test_medication.py` | 用药管理/依从性/相互作用 | 23 |
 | `test_report.py` | 周报/月报生成/列表/详情/删除 | 21 |
 | `test_visit.py` | 就医准备摘要生成/列表/详情/删除 | 21 |
+| `test_symptom.py` | 症状日记 NLP 分析/列表/详情/删除 | 20 |
 | `test_system.py` | 健康检查 | 2 |
 
 ---
