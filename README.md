@@ -2,8 +2,9 @@
 
 > 用 AI 技术帮助家庭轻松管理健康，让每个成员都有自己的智能健康助理。
 
-[![Python](https://img.shields.io/badge/Python-3.12-blue)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.111-green)](https://fastapi.tiangolo.com)
+[![Python](https://img.shields.io/badge/Python-3.9-blue)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.4.0-green)](https://fastapi.tiangolo.com)
+[![Tests](https://img.shields.io/badge/Tests-82%2F82-brightgreen)](#测试)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://docs.docker.com/compose/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -13,35 +14,73 @@
 
 | 功能 | 状态 | 说明 |
 |------|------|------|
-| 🔐 家庭账户注册 / 登录 | ✅ 已完成 | JWT 认证，access + refresh token |
-| 📱 微信小程序 | ⬜ 计庒中 | 日常用户端（uni-app），血压录入/问诊/检验单 |
-| 📱 Flutter App | ⬜ 计庒中 | iOS/Android，适配老人大字体 UI |
-| 💻 Web 管理后台 | ⬜ 计庒中 | React + Ant Design Pro，家庭健康总览 / 异常预警 || 📱 微信小程序 | ⬜ 计庒中 | 日常用户端（uni-app），血压录入/问诊/检验单 |
-| 📱 Flutter App | ⬜ 计庒中 | iOS/Android，适配老人大字体 UI |
-| 💻 Web 管理后台 | ⬜ 计庒中 | React + Ant Design Pro，家庭健康总览 / 异常銄警 || 📊 健康数据录入 | ⬜ 计划中 | 血压/血糖/体重/心率等 10 种指标 |
+| 🔐 家庭账户注册 / 登录 | ✅ 已完成 | JWT 认证，access + refresh token，家庭成员 RBAC |
+| 📊 健康数据录入 | ✅ 已完成 | 血压/血糖/体重/心率等 10 种指标，CSV 批量导入 |
+| 💬 健康 RAG 问答助手 | ✅ 已完成 v3 | OpenAI Tool Calling 三工具 + 多成员记忆隔离 |
+| 📚 健康知识库 | ✅ 已完成 | disease / red_flag / triage 三分区，支持批量导入 |
+| 📱 微信小程序 | ⬜ 计划中 | 日常用户端（uni-app），血压录入/问诊/检验单 |
+| 📱 Flutter App | ⬜ 计划中 | iOS/Android，适配老人大字体 UI |
+| 💻 Web 管理后台 | ⬜ 计划中 | React + Ant Design Pro，家庭健康总览 / 异常预警 |
 | 🔬 检验单 AI 解读 | ⬜ 计划中 | OCR 识别 + LLM 通俗解释异常项 |
-| 💬 健康 RAG 问答 | ✅ 已完成 v2 | Agentic 三工具 + 多成员记忆隔离 + 表格感知分块 + Rerank |
 | 💊 用药管理提醒 | ⬜ 计划中 | 智能提醒 + 依从性追踪 |
 | 📈 慢病趋势预测 | ⬜ 计划中 | 时序模型预警血压/血糖异常趋势 |
 | 📝 健康周报/月报 | ⬜ 计划中 | 自动生成家庭健康趋势报告 |
 
 ---
 
+## RAG 问答助手架构（v3）
+
+参考 [FamilyHealthyAgent](https://github.com/qianandgrace/FamilyHealthyAgent) 设计，实现真正的 **OpenAI Tool Calling** 两轮推理：
+
+```
+用户提问
+   │
+   ▼
+Round 1 — LLM 自主决定调用哪些工具（tool_choice=auto）
+   │
+   ├─► check_red_flag   → 搜索红旗症状库（20条紧急症状）
+   │                       分数>阈值 → 提示立即就医/拨打120
+   ├─► get_triage       → 搜索分诊导诊库（11个科室指南）
+   │                       "挂什么科/看哪个科" 等问题
+   └─► search_disease   → 搜索疾病科普/药物知识库
+                          默认兜底，支持 category 过滤
+   │
+   ▼
+Execute — asyncio.gather 并行执行工具（Qdrant 向量检索）
+   │
+   ▼
+Round 2 — LLM 读取工具结果，生成最终回答（支持流式 SSE）
+```
+
+**核心特性：**
+- **多成员记忆隔离**：每位成员（`member_id`）独立会话历史，互不干扰
+- **个体化约束**：将成员档案（年龄/慢病/用药/近期指标）注入 system prompt
+- **可追溯引用**：回答附带 `sources`（来源/标题/分类）
+- **CrossEncoder Rerank**：可选，`USE_RERANKER=true` 时对检索结果重排（`ms-marco-MiniLM-L-6-v2`）
+- **Redis 查询缓存**：热门问题 5 分钟缓存，极速响应
+
+---
+
 ## 技术架构
 
 ```
-FastAPI ──► PostgreSQL  （用户/成员/用药/报告）
+FastAPI ──► PostgreSQL  （用户/成员/用药/报告，SQLAlchemy async）
         ──► InfluxDB    （血压/心率等时序数据）
-        ──► Qdrant      （RAG 知识库向量检索，支持 disease/red_flag/triage 三分区）
-        ──► Redis       （Embedding 缓存 7天 + 查询缓存 5分钟 + 任务队列）
+        ──► Qdrant      （RAG 向量检索，disease/red_flag/triage 三分区）
+        ──► Redis       （查询缓存 5min + Celery 任务队列）
         ──► Celery      （OCR/LLM 异步任务）
 
-RAG 层： EmbeddingService → Qdrant 向量检索 → CrossEncoder Rerank
-         → Agentic 路由（red_flag / triage / disease）→ LLM 生成
+知识库层：
+  表格感知分块（Markdown 表格整体保留）
+  → EmbeddingService（OpenAI text-embedding-3-small，可替换本地 bge-m3）
+  → Qdrant upsert（MD5 hash 幂等，category 字段分区）
+  → CrossEncoder Rerank（可选）
+  → Redis 查询缓存
 
-微信小程序 ──► 日常用户端（血压录入/检验单/问诊）
-Flutter App ─► iOS / Android（老人友好大字体 UI）
-Web 管理后台 ► 家庭健康总览 / 异常预警 / 成员管理
+问答层：
+  OpenAI Tool Calling Round 1（工具选择）
+  → asyncio.gather 并行执行三工具
+  → OpenAI Round 2（流式生成最终回答）
 ```
 
 详见 [doc/architecture.md](doc/architecture.md)
@@ -52,8 +91,7 @@ Web 管理后台 ► 家庭健康总览 / 异常预警 / 成员管理
 
 ### 前置条件
 
-- Docker 24+
-- Docker Compose 2.20+
+- Docker 24+ & Docker Compose 2.20+
 - Git
 
 ### 1. 克隆仓库
@@ -67,15 +105,15 @@ cd lifecopilot
 
 ```bash
 cp .env.example .env.dev
-# 编辑 .env.dev，填写以下必要配置：
-# - SECRET_KEY        JWT 签名密钥（随机字符串）
-# - POSTGRES_PASSWORD 数据库密码
-# - INFLUX_TOKEN      InfluxDB API Token
-# - REDIS_PASSWORD    Redis 密码
-# - OPENAI_API_KEY    LLM API 密钥
+# 必填项：
+# SECRET_KEY        JWT 签名密钥（随机字符串）
+# POSTGRES_PASSWORD 数据库密码
+# REDIS_PASSWORD    Redis 密码
+# OPENAI_API_KEY    LLM/Embedding API 密钥
+# OPENAI_BASE_URL   可替换为阿里百炼/本地 Ollama 等兼容接口
 ```
 
-### 3. 启动开发环境（含热更新）
+### 3. 启动开发环境
 
 ```bash
 make dev
@@ -84,13 +122,75 @@ make dev
 服务启动后访问：
 - **API 文档**：http://localhost:8000/docs
 - **健康检查**：http://localhost:8000/health
-- **InfluxDB 控制台**：http://localhost:8086
 - **Qdrant 控制台**：http://localhost:6333/dashboard
 
 ### 4. 初始化数据库
 
 ```bash
-make db-migrate    # 执行所有数据库迁移，创建表结构
+make db-migrate
+```
+
+### 5. 导入健康知识库（三库一键导入）
+
+```bash
+# 导入示例数据（disease 科普 + red_flag 红旗症状 + triage 分诊导诊）
+make import-all-knowledge
+
+# 或分开导入
+make import-red-flag    # 红旗症状库（20条紧急症状）
+make import-triage      # 分诊导诊库（11个科室指南）
+make import-sample      # 疾病科普库（示例文章）
+
+# 导入丁香医生文章（填写 data/dxy_urls.txt 后）
+make dxy-import URL_FILE=data/dxy_urls.txt
+
+# 导入本地文档目录
+make import-dir DIR=docs/medical/ SOURCE="丁香医生" CATEGORY=内科
+```
+
+---
+
+## API 说明
+
+### 健康问答
+
+```
+POST   /api/v1/chat/          同步问答（两轮 Tool Calling）
+POST   /api/v1/chat/stream    流式问答（SSE，Round 2 逐 token 返回）
+DELETE /api/v1/chat/sessions/{id}   清除指定会话
+DELETE /api/v1/chat/sessions/me     清除当前成员会话历史
+```
+
+### 知识库管理
+
+```
+POST   /api/v1/chat/knowledge           摄入文档（admin only）
+DELETE /api/v1/chat/knowledge/{source}  按来源删除（admin only）
+GET    /api/v1/chat/knowledge/stats     知识库统计（admin only）
+```
+
+### 健康数据
+
+```
+POST   /api/v1/health/{member_id}/records         录入健康指标
+POST   /api/v1/health/{member_id}/records/batch   批量录入（≤500条）
+POST   /api/v1/health/{member_id}/records/import-csv  CSV 导入
+GET    /api/v1/health/{member_id}/records         查询记录（支持过滤/分页）
+GET    /api/v1/health/{member_id}/summary         各指标统计摘要
+DELETE /api/v1/health/{member_id}/records/{id}    删除单条记录
+```
+
+### 认证
+
+```
+POST   /api/v1/auth/register              注册家庭账户
+POST   /api/v1/auth/login                 登录
+POST   /api/v1/auth/refresh               刷新 token
+GET    /api/v1/auth/me                    当前成员信息
+GET    /api/v1/auth/family                家庭信息+成员列表（admin）
+POST   /api/v1/auth/family/members        添加成员（admin）
+PATCH  /api/v1/auth/family/members/{id}   更新成员信息
+DELETE /api/v1/auth/family/members/{id}   删除成员（admin）
 ```
 
 ---
@@ -98,46 +198,67 @@ make db-migrate    # 执行所有数据库迁移，创建表结构
 ## 常用命令
 
 ```bash
-make dev           # 启动开发环境（热更新）
-make dev-d         # 后台启动
-make down          # 停止所有服务
-make logs          # 查看所有日志
-make logs-api      # 仅查看 API 日志
-make shell         # 进入 API 容器
-make db-migrate    # 执行数据库迁移
-make db-shell      # 进入 PostgreSQL 交互终端
-make test          # 在 Docker 中运行单元+集成测试
-make test-local    # 在本地环境运行测试（需先 pip install -r requirements-test.txt）
-make test-cov      # 生成测试覆盖率报告
-make test-e2e      # 运行 Selenium E2E 测试
-make lint          # 代码检查
-make format        # 代码格式化
+# 开发
+make dev              # 启动开发环境（热更新）
+make dev-d            # 后台启动
+make down             # 停止所有服务
+make logs-api         # 查看 API 日志
+make shell            # 进入 API 容器
+
+# 数据库
+make db-migrate       # 执行数据库迁移
+make db-shell         # 进入 PostgreSQL 终端
+
+# 知识库
+make import-all-knowledge   # 一键导入三库（disease/red_flag/triage）
+make import-red-flag        # 仅导入红旗症状库
+make import-triage          # 仅导入分诊导诊库
+make import-sample          # 仅导入疾病科普示例
+
+# 测试
+make test-local       # 本地运行测试（推荐开发时使用）
+make test             # Docker 内运行测试
+make test-cov         # 生成覆盖率报告
+
+# 代码质量
+make lint             # ruff 代码检查
+make format           # ruff 格式化
 ```
 
 ---
 
 ## 测试
 
-项目使用 **pytest + pytest-asyncio** 进行后端测试，**Selenium** 进行 Web Admin E2E 测试。
+项目使用 **pytest + pytest-asyncio** 进行后端测试，SQLite in-memory 隔离，无需启动外部服务。
 
 ```bash
-# 安装测试依赖（仅需一次）
 pip install -r requirements-test.txt
-
-# 运行所有单元 + 集成测试
 python -m pytest tests/ --ignore=tests/e2e -v
-
-# 仅运行单元测试
-python -m pytest tests/ -m unit -v
-
-# 运行 E2E 测试（须先启动 Web Admin 服务）
-python -m pytest tests/e2e/ --base-url=http://localhost:3000 -v
-
-# 查看覆盖率
-python -m pytest tests/ --ignore=tests/e2e --cov=src --cov-report=html
 ```
 
-**测试状态**：82/82 通过 ✅（单元测试 23 + 集成测试 57 + 系统测试 2）
+**测试状态：82/82 通过 ✅**
+
+| 测试文件 | 内容 | 数量 |
+|----------|------|------|
+| `test_security.py` | JWT/密码哈希单元测试 | 11 |
+| `test_auth.py` | 注册/登录/refresh/me 集成测试 | 14 |
+| `test_members.py` | 家庭成员 CRUD | 15 |
+| `test_health.py` | 健康数据录入/查询/CSV 导入 | 17 |
+| `test_chat.py` | RAG 问答/工具/知识库 API | 21 |
+| `test_system.py` | 健康检查 | 2 |
+
+---
+
+## 知识库数据
+
+| 文件 | 分类（`category`） | 对应工具 | 条目数 |
+|------|--------------------|----------|--------|
+| `data/red_flag_symptoms.json` | `red_flag` | `check_red_flag` | 20条（胸痛/脑卒中/心脏骤停等） |
+| `data/triage_guide.json` | `triage` | `get_triage` | 11条（各症状挂号指南） |
+| `data/sample_articles.json` | `disease` | `search_disease` | 5条（高血压/糖尿病等示例） |
+| `data/dxy_urls.txt` | — | 爬虫 URL 列表 | 填写后运行 `make dxy-import` |
+
+扩充知识库：在对应 JSON 文件追加条目后，重新运行导入命令（`upsert` 幂等，不会产生重复）。
 
 ---
 
@@ -146,29 +267,29 @@ python -m pytest tests/ --ignore=tests/e2e --cov=src --cov-report=html
 ```
 lifecopilot/
 ├── src/
-│   ├── main.py              # FastAPI 应用入口
-│   ├── core/                # 配置 / 数据库 / 日志
-│   ├── models/              # SQLAlchemy ORM 模型
-│   ├── api/v1/routers/      # API 路由（待实现）
-│   ├── services/            # 业务逻辑层（待实现）
-│   └── workers/             # Celery 异步任务
-├── alembic/                 # 数据库迁移脚本
-├── docker/                  # 各服务配置文件
-├── doc/                     # 设计文档
-│   └── architecture.md      # 系统架构设计
-├── tests/
-│   ├── conftest.py          # pytest fixtures（SQLite in-memory + AsyncClient）
-│   ├── test_security.py     # 安全模块单元测试（JWT/密码哈希）
-│   ├── test_auth.py         # 认证 API 集成测试
-│   ├── test_members.py      # 成员管理 API 集成测试
-│   ├── test_system.py       # 系统健康检查测试
-│   └── e2e/                 # Selenium E2E 测试（Web Admin）
-├── Dockerfile               # 多阶段构建
-├── docker-compose.yml       # 生产环境
-├── docker-compose.dev.yml   # 开发环境（热更新）
-├── Makefile                 # 快捷命令
-├── requirements.txt         # Python 依赖
-└── TASKS.md                 # 项目任务清单与进度
+│   ├── main.py                    # FastAPI 应用入口（v0.4.0）
+│   ├── core/                      # 配置 / 数据库 / Qdrant / 日志
+│   ├── models/                    # SQLAlchemy ORM 模型（5个模型文件）
+│   ├── api/v1/routers/            # auth / health / chat 三组路由
+│   ├── services/
+│   │   ├── knowledge_service.py   # 向量化 + 检索 + Rerank + Redis 缓存
+│   │   ├── chat_service.py        # Tool Calling 两轮推理 + 多成员会话
+│   │   └── embedding_service.py   # Embedding 抽象层（OpenAI / bge-m3）
+│   └── workers/                   # Celery 异步任务
+├── data/
+│   ├── red_flag_symptoms.json     # 红旗症状库（20条）
+│   ├── triage_guide.json          # 分诊导诊库（11条）
+│   ├── sample_articles.json       # 疾病科普示例（5条）
+│   └── dxy_urls.txt               # 丁香医生文章 URL 列表
+├── scripts/
+│   ├── import_knowledge.py        # 批量导入工具（JSON/目录/单文件/PDF）
+│   └── dxy_crawler.py             # 丁香医生文章爬虫（礼貌间隔，个人学习用）
+├── alembic/                       # 数据库迁移脚本
+├── tests/                         # pytest 测试套件（82个用例）
+├── docker/                        # 各服务 Docker 配置
+├── doc/architecture.md            # 系统架构设计文档
+├── Makefile                       # 快捷命令
+└── TASKS.md                       # 项目任务清单与进度
 ```
 
 ---
@@ -181,13 +302,15 @@ lifecopilot/
 |------|------|--------|
 | 阶段零：Docker 部署基础设施 | ✅ 已完成 | 100% |
 | 阶段一：基础架构搭建 | ✅ 已完成 | 100% |
-| 阶段二：核心健康监测 | 🔄 进行中 | 15% |
-| 阶段三：智能问诊助手（RAG） | 🔄 进行中 | 50% |
+| 阶段二：核心健康监测 | 🔄 进行中 | 15%（健康数据录入已完成）|
+| 阶段三：智能问诊助手（RAG） | 🔄 进行中 | 60%（知识库+Tool Calling问答已完成）|
 | 阶段四：生活方式干预 | ⬜ 未开始 | 0% |
-| 阶段五～七 | ⬜ 未开始 | 0% |
+| 阶段五～七：前端/报告/部署 | ⬜ 未开始 | 0% |
+
+**下一步（优先级 P0）**：T012 检验单 AI 解读（OCR + LLM + LabReport 模型）
 
 ---
 
 ## 免责声明
 
-本系统提供的所有 AI 分析结果（检验单解读、症状分析、用药建议等）**仅供参考，不构成医疗诊断意见**。如有健康问题请及时就医，遵从专业医生的建议。
+本系统提供的所有 AI 分析结果（症状判断、检验单解读、用药建议等）**仅供参考，不构成医疗诊断意见**。如有健康问题请及时就医，遵从执业医师的诊断和建议。紧急情况请立即拨打 **120**。
