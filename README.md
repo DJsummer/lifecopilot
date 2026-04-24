@@ -5,8 +5,8 @@
 [English](README_EN.md)
 
 [![Python](https://img.shields.io/badge/Python-3.9-blue)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.7.0-green)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/Tests-146%2F146-brightgreen)](#测试)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.8.0-green)](https://fastapi.tiangolo.com)
+[![Tests](https://img.shields.io/badge/Tests-167%2F167-brightgreen)](#测试)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://docs.docker.com/compose/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -214,11 +214,17 @@ GET    /api/v1/medications/{member_id}/{med_id}/adherence       依从性记录�
 GET    /api/v1/medications/{member_id}/{med_id}/adherence/stats 依从性统计（按时率）
 POST   /api/v1/medications/{member_id}/interaction-check        多药物相互作用风险检查
 
-# 健康周报/月报（T018）
+# 延迟至 T019
 POST   /api/v1/reports/{member_id}/generate                    生成周报或月报（LLM 总结 + 指标统计）
 GET    /api/v1/reports/{member_id}                             报告历史列表（可按 weekly/monthly 过滤）
 GET    /api/v1/reports/{member_id}/{report_id}                 报告详情（含 metric_stats / notable_events）
 DELETE /api/v1/reports/{member_id}/{report_id}                 删除报告
+
+# 就医准备助手（T019）
+POST   /api/v1/visit/{member_id}                              生成就诊摘要（中/英文/双语）
+GET    /api/v1/visit/{member_id}                              摘要历史列表
+GET    /api/v1/visit/{member_id}/{visit_id}                   摘要详情（全快照 + LLM 文本）
+DELETE /api/v1/visit/{member_id}/{visit_id}                   删除摘要
 ```
 
 ---
@@ -264,7 +270,7 @@ pip install -r requirements-test.txt
 python -m pytest tests/ --ignore=tests/e2e -v
 ```
 
-**测试状态：146/146 通过 ✅**
+**测试状态：167/167 通过 ✅**
 
 | 测试文件 | 内容 | 数量 |
 |----------|------|------|
@@ -276,6 +282,7 @@ python -m pytest tests/ --ignore=tests/e2e -v
 | `test_lab_report.py` | 检验单上传/AI 解读/趋势 | 20 |
 | `test_medication.py` | 用药管理/依从性/相互作用 | 23 |
 | `test_report.py` | 周报/月报生成/列表/详情/删除 | 21 |
+| `test_visit.py` | 就医准备摘要生成/列表/详情/删除 | 21 |
 | `test_system.py` | 健康检查 | 2 |
 
 ---

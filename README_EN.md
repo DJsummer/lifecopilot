@@ -3,8 +3,8 @@
 > AI-powered health management for the whole family — every member gets their own intelligent health assistant.
 
 [![Python](https://img.shields.io/badge/Python-3.9-blue)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.7.0-green)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/Tests-146%2F146-brightgreen)](#testing)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.8.0-green)](https://fastapi.tiangolo.com)
+[![Tests](https://img.shields.io/badge/Tests-167%2F167-brightgreen)](#testing)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://docs.docker.com/compose/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -21,8 +21,10 @@
 | 💬 Health RAG Chatbot | ✅ Done v3 | OpenAI Tool Calling (3 tools) + per-member memory isolation |
 | 📚 Health Knowledge Base | ✅ Done | 3-partition Qdrant store: `disease` / `red_flag` / `triage` |
 | 🔬 Lab Report AI Interpretation | ✅ Done v1 | OCR + LLM structured analysis + abnormal trend comparison |
-| � Medication Management | ✅ Done v1 | LLM drug explanation + adherence tracking + interaction check || 📈 Weekly / Monthly Reports | ✅ Done v1 | LLM summary + metric stats + adherence overview + notable events || 📈 Chronic Disease Prediction | ⬜ Planned | Time-series model for BP / glucose trend alerts |
-| 📝 Weekly / Monthly Reports | ⬜ Planned | Auto-generated family health trend reports |
+| 📊 Medication Management | ✅ Done v1 | LLM drug explanation + adherence tracking + interaction check |
+| 📈 Weekly / Monthly Reports | ✅ Done v1 | LLM summary + metric stats + adherence overview + notable events |
+| 🏥 Pre-Visit Assistant | ✅ Done v1 | Structured visit summary (ZH/EN) + auto-aggregated medication / metrics / lab snapshots |
+| 📈 Chronic Disease Prediction | ⬜ Planned | Time-series model for BP / glucose trend alerts |
 
 ---
 
@@ -243,7 +245,7 @@ pip install -r requirements-test.txt
 python -m pytest tests/ --ignore=tests/e2e -v
 ```
 
-**Test status: 146 / 146 passing ✅**
+**Test status: 167 / 167 passing ✅**
 
 | Test file | Coverage | Count |
 |-----------|----------|-------|
@@ -255,6 +257,7 @@ python -m pytest tests/ --ignore=tests/e2e -v
 | `test_lab_report.py` | Lab report upload / AI interpretation / trend | 20 |
 | `test_medication.py` | Medication management / adherence / interactions | 23 |
 | `test_report.py` | Weekly/monthly report generate / list / detail / delete | 21 |
+| `test_visit.py` | Pre-visit summary generate / list / detail / delete | 21 |
 | `test_system.py` | Health check | 2 |
 
 ---
