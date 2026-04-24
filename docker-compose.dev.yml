@@ -1,0 +1,67 @@
+# LifePilot — 开发环境覆盖配置（热更新）
+# 用法: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+# 简写: make dev
+
+services:
+
+  api:
+    build:
+      target: development          # 使用 Dockerfile 中的 development 阶段
+    container_name: lifepilot-api-dev
+    env_file: .env.dev
+    volumes:
+      - ./src:/app/src              # 挂载源码 → uvicorn --reload 检测到变更自动重启
+      - ./tests:/app/tests
+      - ./scripts:/app/scripts
+    ports:
+      - "8000:8000"
+      - "5678:5678"                 # debugpy 远程调试端口
+    environment:
+      - ENV=development
+      - DEBUG=true
+      - WATCHFILES_FORCE_POLLING=true   # 某些文件系统（WSL/NFS）需要轮询
+    command: >
+      uvicorn src.main:app
+      --host 0.0.0.0
+      --port 8000
+      --reload
+      --reload-dir /app/src
+      --log-level debug
+
+  # 开发时 worker 也挂载源码，代码改动无需重建镜像
+  worker:
+    build:
+      target: development
+    container_name: lifepilot-worker-dev
+    env_file: .env.dev
+    volumes:
+      - ./src:/app/src
+    environment:
+      - ENV=development
+    command: >
+      watchfiles
+      "celery -A src.workers.celery_app worker --loglevel=debug --concurrency=1"
+      src/
+
+  # 开发时跳过 nginx，直接访问 API
+  nginx:
+    profiles:
+      - prod-only               # 仅在明确指定 profile 时启动
+
+  # 开发时暴露更多端口方便调试
+  postgres:
+    ports:
+      - "5432:5432"
+
+  influxdb:
+    ports:
+      - "8086:8086"
+
+  qdrant:
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+
+  redis:
+    ports:
+      - "6379:6379"

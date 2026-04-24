@@ -1,0 +1,19 @@
+# LifePilot — .gitignore
+.env
+.env.dev
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+dist/
+build/
+*.log
+data/postgres/
+data/influxdb/
+data/qdrant/
+data/redis/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
