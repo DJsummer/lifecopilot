@@ -14,8 +14,11 @@
 | 功能 | 状态 | 说明 |
 |------|------|------|
 | 🔐 家庭账户注册 / 登录 | ✅ 已完成 | JWT 认证，access + refresh token |
-| 👥 家庭成员管理 | ✅ 已完成 | 多角色（admin/adult/elder/child）CRUD + 权限隔离 |
-| 📊 健康数据录入 | ⬜ 计划中 | 血压/血糖/体重/心率等 10 种指标 |
+| 📱 微信小程序 | ⬜ 计庒中 | 日常用户端（uni-app），血压录入/问诊/检验单 |
+| 📱 Flutter App | ⬜ 计庒中 | iOS/Android，适配老人大字体 UI |
+| 💻 Web 管理后台 | ⬜ 计庒中 | React + Ant Design Pro，家庭健康总览 / 异常预警 || 📱 微信小程序 | ⬜ 计庒中 | 日常用户端（uni-app），血压录入/问诊/检验单 |
+| 📱 Flutter App | ⬜ 计庒中 | iOS/Android，适配老人大字体 UI |
+| 💻 Web 管理后台 | ⬜ 计庒中 | React + Ant Design Pro，家庭健康总览 / 异常銄警 || 📊 健康数据录入 | ⬜ 计划中 | 血压/血糖/体重/心率等 10 种指标 |
 | 🔬 检验单 AI 解读 | ⬜ 计划中 | OCR 识别 + LLM 通俗解释异常项 |
 | 💬 健康 RAG 问答 | ⬜ 计划中 | 基于权威知识库的智能问诊助手 |
 | 💊 用药管理提醒 | ⬜ 计划中 | 智能提醒 + 依从性追踪 |
@@ -32,6 +35,10 @@ FastAPI ──► PostgreSQL  （用户/成员/用药/报告）
         ──► Qdrant      （RAG 知识库向量检索）
         ──► Redis       （缓存/任务队列）
         ──► Celery      （OCR/LLM 异步任务）
+
+微信小程序 ──► 日常用户端（血压录入/检验单/问诊）
+Flutter App ─► iOS / Android（老人友好大字体 UI）
+Web 管理后台 ► 家庭健康总览 / 异常预警 / 成员管理
 ```
 
 详见 [doc/architecture.md](doc/architecture.md)
