@@ -1,7 +1,7 @@
 # LifePilot - 家庭健康管理 AI 项目任务清单
 
 > 创建日期：2026-04-24  
-> 最后更新：2026-04-24（T-test 完成：pytest+selenium 测试框架搭建；44 个单元+集成测试全部通过）  
+> 最后更新：2026-04-24（T-test 完成：pytest+selenium 测试框架搭建；T004 完成：健康数据录入 API；61 个测试全部通过）  
 > 目标：用 AI 技术实现一套家庭健康管理系统
 
 ---
@@ -136,11 +136,36 @@ make test-local
 
 ## 阶段二：核心健康监测
 
-### T004 - 健康数据录入模块
-- [ ] 开发手动录入 API（血压、血糖、体重、心率等指标）
-- [ ] 集成可穿戴设备数据接入（Apple Health / Mi Band / Fitbit API）
-- [ ] 实现批量导入历史数据（CSV 格式）
-- [ ] 数据合法性校验与异常值过滤
+### T004 - 健康数据录入模块 ✅
+> 完成于 2026-04-24
+
+- [x] 开发手动录入 API（血压、血糖、体重、心率等指标）
+  - `POST   /api/v1/health/{member_id}/records` 单条录入（含异常值验证）
+  - `POST   /api/v1/health/{member_id}/records/batch` 批量录入（JSON，最多 500 条）
+  - `POST   /api/v1/health/{member_id}/records/import-csv` CSV 批量导入历史数据
+  - `GET    /api/v1/health/{member_id}/records` 记录列表（支持按类型/时间过滤 + 分页）
+  - `DELETE /api/v1/health/{member_id}/records/{record_id}` 删除单条记录
+  - `GET    /api/v1/health/{member_id}/summary` 各指标统计摘要（最新值/最大最小/均值）
+- [x] 数据合法性校验与异常值过滤（每种指标的合理值域）
+- [x] 自动填充单位（mmHg / bpm / mmol/L / kg / cm / °C / % 等）
+- [x] 权限控制（仅本人或 admin 可访问成员数据）
+- [x] 编写 17 个集成测试（全部通过）
+
+支持的 10 种指标类型：
+| 指标 | MetricType | 单位 | 正常范围 |
+|------|-----------|------|---------|
+| 收缩压 | blood_pressure_sys | mmHg | 50–300 |
+| 舒张压 | blood_pressure_dia | mmHg | 30–200 |
+| 心率 | heart_rate | bpm | 20–300 |
+| 血糖 | blood_glucose | mmol/L | 1–50 |
+| 体重 | weight | kg | 1–500 |
+| 身高 | height | cm | 20–300 |
+| 体温 | body_temperature | °C | 30–45 |
+| 血氧 | spo2 | % | 50–100 |
+| 步数 | steps | 步 | 0–200000 |
+| 睡眠 | sleep_hours | h | 0–24 |
+
+- [ ] 集成可穿戴设备数据接入（Apple Health / Mi Band / Fitbit API）— 延后至 T005
 
 ### T005 - 慢病趋势预测
 - [ ] 收集并清洗时序健康数据集（血压/血糖）
@@ -315,8 +340,8 @@ make test-local
 | ✅ 完成 | T001 基础架构 | 高 | 低 | 已完成 |
 | P0 🔴 | T002 数据库 ORM 模型 | 高 | 中 | ✅ 已完成 |
 | P0 🔴 | T003 认证与多用户 | 高 | 中 | ✅ 已完成 |
-| ✅ 完成 | T-test 测试框架 | 高 | 中 | ✅ 已完成 (44/44) |
-| P0 🔴 | T004 健康数据录入 | 高 | 低 | ⬜ 未开始 |
+| ✅ 完成 | T-test 测试框架 | 高 | 中 | ✅ 已完成 (61/61) |
+| P0 🔴 | T004 健康数据录入 | 高 | 低 | ✅ 已完成 |
 | P0 🔴 | T010 RAG 问答助手 | 高 | 中 | ⬜ 未开始 |
 | P0 🔴 | T012 检验单解读 | 极高 | 中 | ⬜ 未开始 |
 | P1 🟡 | T005 慢病趋势预测 | 高 | 高 | ⬜ 未开始 |
@@ -337,7 +362,7 @@ make test-local
 ## 推荐起步路径
 
 ```
-✅ T000 → ✅ T001 → ✅ T002 → ✅ T003 → T004 → T009 → T010 → T012 → T020 → T018
+✅ T000 → ✅ T001 → ✅ T002 → ✅ T003 → ✅ T004 → T009 → T010 → T012 → T020 → T018
 ```
 
 > **最小可行产品（MVP）**：健康数据录入 + 检验单 AI 解读 + RAG 问答助手

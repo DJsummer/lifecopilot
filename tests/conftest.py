@@ -1,16 +1,16 @@
 """
 pytest 全局 fixtures
-- 使用 SQLite in-memory 数据库，测试间完全隔离，无需真实 Postgres
-- 每个测试函数拥有独立的事务，测试后自动回滚
+- 使用 SQLite in-memory 数据库（StaticPool 模式，共享单一连接）
+- 每个测试使用唯一邮箱注册，避免跨测试 email 冲突（committed 数据跨测试持久化）
 """
 import os
+import uuid as _uuid
 
 # 测试环境提前加载 .env.test，避免 pydantic-settings 找不到必填字段
 os.environ.setdefault("ENV", "test")
 from dotenv import load_dotenv
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env.test"), override=True)
 
-import asyncio
 from collections.abc import AsyncGenerator
 
 import pytest
@@ -37,11 +37,10 @@ async def engine():
 
 @pytest_asyncio.fixture
 async def db_session(engine) -> AsyncGenerator[AsyncSession, None]:
-    """每个测试获得独立 session，测试后回滚"""
+    """每个测试获得独立 session"""
     session_factory = async_sessionmaker(engine, expire_on_commit=False)
     async with session_factory() as session:
         yield session
-        await session.rollback()
 
 
 @pytest_asyncio.fixture
@@ -60,22 +59,28 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     app.dependency_overrides.clear()
 
 
-# ── 常用测试数据 ───────────────────────────────────────────────────────
-REGISTER_PAYLOAD = {
-    "family_name": "测试家庭",
-    "nickname": "测试管理员",
-    "email": "admin@test.com",
-    "password": "Test1234",
-    "gender": "male",
-}
+def make_register_payload() -> dict:
+    """生成带唯一邮箱的注册数据（避免跨测试邮箱冲突）"""
+    uid = _uuid.uuid4().hex[:8]
+    return {
+        "family_name": f"测试家庭_{uid}",
+        "nickname": "测试管理员",
+        "email": f"admin_{uid}@test.com",
+        "password": "Test1234",
+        "gender": "male",
+    }
 
 
 @pytest_asyncio.fixture
 async def registered_family(client: AsyncClient) -> dict:
-    """已注册的家庭，返回 TokenResponse"""
-    resp = await client.post("/api/v1/auth/register", json=REGISTER_PAYLOAD)
-    assert resp.status_code == 201
-    return resp.json()
+    """已注册的家庭（唯一邮箱），返回 TokenResponse + _register_payload"""
+    payload = make_register_payload()
+    resp = await client.post("/api/v1/auth/register", json=payload)
+    assert resp.status_code == 201, f"注册失败：{resp.json()}"
+    result = resp.json()
+    result["_email"] = payload["email"]      # 供登录测试使用
+    result["_password"] = payload["password"]
+    return result
 
 
 @pytest_asyncio.fixture

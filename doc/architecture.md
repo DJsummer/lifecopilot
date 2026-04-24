@@ -393,12 +393,30 @@ PATCH  /api/v1/members/{id}           更新成员信息
 DELETE /api/v1/members/{id}           删除成员
 ```
 
-#### 健康数据
+#### 健康数据（✅ 已实现 T004）
 ```
-POST   /api/v1/members/{id}/records   录入健康指标
-GET    /api/v1/members/{id}/records   查询历史记录（支持时间范围/指标类型过滤）
-POST   /api/v1/members/{id}/records/import  批量导入 CSV
+POST   /api/v1/health/{member_id}/records            单条录入（含异常值校验）
+POST   /api/v1/health/{member_id}/records/batch      批量录入（JSON，≤500 条）
+POST   /api/v1/health/{member_id}/records/import-csv CSV 批量导入历史数据（≤5MB）
+GET    /api/v1/health/{member_id}/records            记录列表（按类型/时间过滤+分页）
+DELETE /api/v1/health/{member_id}/records/{rid}      删除单条记录
+GET    /api/v1/health/{member_id}/summary            各指标统计摘要（最近 N 天）
 ```
+
+**值域校验**（异常值直接拒绝，返回 422）：
+
+| 指标 | 单位 | 最小值 | 最大值 |
+|------|------|--------|--------|
+| blood_pressure_sys | mmHg | 50 | 300 |
+| blood_pressure_dia | mmHg | 30 | 200 |
+| heart_rate | bpm | 20 | 300 |
+| blood_glucose | mmol/L | 1.0 | 50.0 |
+| weight | kg | 1.0 | 500.0 |
+| height | cm | 20.0 | 300.0 |
+| body_temperature | °C | 30.0 | 45.0 |
+| spo2 | % | 50.0 | 100.0 |
+| steps | 步 | 0 | 200000 |
+| sleep_hours | h | 0 | 24 |
 
 #### 检验单
 ```
@@ -693,7 +711,7 @@ Dashboard    → 家庭全员关键指标卡片 + 近期异常列表
 | 集成测试 | pytest + httpx AsyncClient | 所有 API 端点 | ✅ 31 用例 |
 | E2E 测试 | Selenium + Chrome | Web Admin 登录/Dashboard | 🔄 框架就绪 |
 
-**当前通过率：44/44（100%）**
+**当前通过率：61/61（100%）**
 
 ### 11.2 测试基础设施
 

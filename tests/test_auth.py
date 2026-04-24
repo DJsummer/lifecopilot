@@ -79,8 +79,8 @@ class TestRegister:
 class TestLogin:
     async def test_login_success(self, client: AsyncClient, registered_family: dict):
         resp = await client.post("/api/v1/auth/login", json={
-            "email": "admin@test.com",
-            "password": "Test1234",
+            "email": registered_family["_email"],
+            "password": registered_family["_password"],
         })
         assert resp.status_code == 200
         data = resp.json()
@@ -89,7 +89,7 @@ class TestLogin:
 
     async def test_login_wrong_password(self, client: AsyncClient, registered_family: dict):
         resp = await client.post("/api/v1/auth/login", json={
-            "email": "admin@test.com",
+            "email": registered_family["_email"],
             "password": "WrongPass1",
         })
         assert resp.status_code == 401
@@ -136,11 +136,11 @@ class TestTokenRefresh:
 @pytest.mark.integration
 @pytest.mark.auth
 class TestMe:
-    async def test_me_success(self, client: AsyncClient, auth_headers: dict):
+    async def test_me_success(self, client: AsyncClient, auth_headers: dict, registered_family: dict):
         resp = await client.get("/api/v1/auth/me", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
-        assert data["email"] == "admin@test.com"
+        assert data["email"] == registered_family["_email"]
         assert data["role"] == "admin"
 
     async def test_me_no_token(self, client: AsyncClient):
