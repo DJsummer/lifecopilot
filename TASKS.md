@@ -1,7 +1,7 @@
 # LifePilot - 家庭健康管理 AI 项目任务清单
 
 > 创建日期：2026-04-24  
-> 最后更新：2026-04-24（T001 README + 工作流规则 完成，阶段一 100%）  
+> 最后更新：2026-04-24（T003 JWT 认证与多用户支持 完成）  
 > 目标：用 AI 技术实现一套家庭健康管理系统
 
 ---
@@ -89,10 +89,21 @@ make dev
 - [ ] 编写 Alembic 初始 migration（需数据库运行后执行：`make db-migrate`）
 - [x] 创建 `src/core/database.py`（异步 engine / session / `get_db` 依赖）
 
-### T003 - 认证与多用户支持
-- [ ] 实现家庭账户注册 / 登录（JWT）
-- [ ] 实现家庭成员子账户管理（家长/老人/儿童角色区分）
-- [ ] 设置成员级别的访问权限控制
+### T003 - 认证与多用户支持 ✅
+- [x] 实现家庭账户注册 / 登录（JWT）
+  - `POST /api/v1/auth/register` 注册家庭账户 + 创建 admin 成员
+  - `POST /api/v1/auth/login` 邮箱密码登录，返回 access + refresh token
+  - `POST /api/v1/auth/refresh` 无感刷新 token
+  - `GET  /api/v1/auth/me` 当前登录成员信息
+- [x] 实现家庭成员子账户管理（家长/老人/儿童角色区分）
+  - `GET    /api/v1/auth/family` 家庭信息 + 成员列表（仅 admin）
+  - `POST   /api/v1/auth/family/members` 添加成员（仅 admin）
+  - `PATCH  /api/v1/auth/family/members/{id}` 更新成员信息（自己或 admin）
+  - `DELETE /api/v1/auth/family/members/{id}` 删除成员（仅 admin）
+- [x] 设置成员级别的访问权限控制
+  - `get_current_member` 依赖：从 Bearer token 解析当前成员
+  - `get_current_admin` 依赖：要求 admin 角色
+  - `require_same_family()` 工具：防止跨家庭越权访问
 
 ---
 
@@ -250,7 +261,7 @@ make dev
 | ✅ 完成 | T000 Docker 部署基础设施 | 高 | 中 | 已完成 |
 | ✅ 完成 | T001 基础架构 | 高 | 低 | 已完成 |
 | P0 🔴 | T002 数据库 ORM 模型 | 高 | 中 | ✅ 已完成 |
-| P0 🔴 | T003 认证与多用户 | 高 | 中 | ⬜ 未开始 |
+| P0 🔴 | T003 认证与多用户 | 高 | 中 | ✅ 已完成 |
 | P0 🔴 | T004 健康数据录入 | 高 | 低 | ⬜ 未开始 |
 | P0 🔴 | T010 RAG 问答助手 | 高 | 中 | ⬜ 未开始 |
 | P0 🔴 | T012 检验单解读 | 极高 | 中 | ⬜ 未开始 |
@@ -268,7 +279,7 @@ make dev
 ## 推荐起步路径
 
 ```
-✅ T000 → 🔄 T001 → T002 → T003 → T004 → T009 → T010 → T012 → T020 → T018
+✅ T000 → ✅ T001 → ✅ T002 → ✅ T003 → T004 → T009 → T010 → T012 → T020 → T018
 ```
 
 > **最小可行产品（MVP）**：健康数据录入 + 检验单 AI 解读 + RAG 问答助手

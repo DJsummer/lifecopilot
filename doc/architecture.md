@@ -1,9 +1,9 @@
 # LifePilot — 系统架构设计文档
 
-> 版本：v0.2  
+> 版本：v0.3  
 > 日期：2026-04-24  
 > 状态：进行中  
-> 变更：第3章技术选型扩展为完整选型理由（含各替代方案对比）
+> 变更：T003 完成，补充认证 API 实现细节及安全章节更新
 
 ---
 
@@ -359,11 +359,29 @@ Payload schema:
 
 ### 5.2 核心端点（规划）
 
-#### 认证
+#### 认证（✅ 已实现）
 ```
-POST   /api/v1/auth/register          注册家庭账户
-POST   /api/v1/auth/login             登录，返回 JWT
-POST   /api/v1/auth/refresh           刷新 token
+POST   /api/v1/auth/register          注册家庭账户（同时创建 admin 成员）
+POST   /api/v1/auth/login             登录，返回 access + refresh token
+POST   /api/v1/auth/refresh           无感刷新 access token
+GET    /api/v1/auth/me                当前登录成员信息
+GET    /api/v1/auth/family            家庭信息 + 成员列表（仅 admin）
+POST   /api/v1/auth/family/members    添加家庭成员（仅 admin）
+PATCH  /api/v1/auth/family/members/{id}  更新成员信息（自己或 admin）
+DELETE /api/v1/auth/family/members/{id}  删除成员（仅 admin，不能删自己）
+```
+
+**Token 策略**：
+- `access_token`：有效期 24h，携带 `member_id` / `family_id` / `role`
+- `refresh_token`：有效期 30 天，仅含 `member_id`，用于静默续签
+- 密码：bcrypt 哈希存储，不可逆
+
+**权限层级**：
+```
+admin  → 可操作家庭内所有成员数据
+adult  → 只能访问/修改自己的数据
+elder  → 同 adult（特殊健康关注标记）
+child  → 同 adult（生长发育追踪）
 ```
 
 #### 成员管理

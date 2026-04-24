@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.core.config import settings
 from src.core.logging import setup_logging
+from src.api.v1.routers import auth
 
 log = structlog.get_logger()
 
@@ -21,7 +22,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="LifePilot — 家庭健康管理 API",
-    version="0.1.0",
+    version="0.2.0",
     docs_url="/docs" if settings.DEBUG else None,
     redoc_url="/redoc" if settings.DEBUG else None,
     lifespan=lifespan,
@@ -41,7 +42,5 @@ async def health():
     return {"status": "ok", "env": settings.ENV}
 
 
-# 注册路由（后续各模块在此添加）
-# from src.api.v1.routers import auth, members, health_records, chat
-# app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
-# app.include_router(members.router, prefix="/api/v1/members", tags=["members"])
+# ── 路由注册 ──────────────────────────────────────────────────────────
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
