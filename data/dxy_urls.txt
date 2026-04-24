@@ -1,0 +1,22 @@
+# 丁香医生文章 URL 列表（每行一个 URL，# 开头为注释）
+# 使用方式：python scripts/dxy_crawler.py --url-file data/dxy_urls.txt --output data/dxy_articles.json
+# 注意：请确认目标页面允许爬取，遵守 robots.txt 和版权规定
+
+# 高血压相关
+# https://dxy.com/article/高血压相关文章URL
+
+# 糖尿病相关
+# https://dxy.com/article/糖尿病相关文章URL
+
+# 儿科相关
+# https://dxy.com/article/儿科相关文章URL
+
+# ── 使用说明 ────────────────────────────────────────────────────────
+# 1. 在丁香医生网站找到对应文章
+# 2. 复制文章 URL（格式如 https://dxy.com/article/xxxxx）
+# 3. 每行粘贴一个 URL
+# 4. 运行爬虫：
+#    python scripts/dxy_crawler.py --url-file data/dxy_urls.txt \
+#        --output data/dxy_articles.json
+# 5. 检查 JSON 输出后，再导入到知识库：
+#    python scripts/import_knowledge.py --json data/dxy_articles.json

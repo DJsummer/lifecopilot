@@ -1,7 +1,7 @@
 # LifePilot - 家庭健康管理 AI 项目任务清单
 
 > 创建日期：2026-04-24  
-> 最后更新：2026-04-24（T009/T010 完成：RAG 健康知识库 + 问答助手；82 个测试全部通过）  
+> 最后更新：2026-04-24（RAG v2 升级：表格感知分块 + 本地 Embedding + Rerank + 多成员记忆隔离 + Agentic 三工具；82 个测试全部通过）  
 > 目标：用 AI 技术实现一套家庭健康管理系统
 
 ---
@@ -197,12 +197,17 @@ make test-local
 ## 阶段三：智能问诊助手（RAG）
 
 ### T009 - 健康知识库构建 ✅
-> 完成于 2026-04-24
+> 完成于 2026-04-24；v2 升级于 2026-04-24
 
 - [x] 文档清洗与分块（token-based chunking，默认 512 token / 64 重叠）
-- [x] OpenAI Embedding API 批量向量化（text-embedding-3-small）
+- [x] **表格感知分块**（Markdown 表格整体保留，跨行不截断）
+- [x] **本地 bge-m3 推理**（`USE_LOCAL_EMBEDDING=true`）+ OpenAI API 双模式
+- [x] **Redis Embedding 缓存**（7 天 TTL，避免重复推理）
 - [x] 向量存入 Qdrant（COSINE 距离，支持 upsert 防重复）
-- [x] 按来源/分类过滤检索
+- [x] **三类知识分区**：`disease` / `red_flag` / `triage`，供 Agentic 路由使用
+- [x] **CrossEncoder Reranker**（`USE_RERANKER=true`，ms-marco-MiniLM-L-6-v2）
+- [x] **Redis 查询缓存**（5 分钟 TTL）
+- [x] 并行多类别检索（`search_multi_category`）
 - [x] 按来源批量删除（用于知识库更新）
 - [x] 统计信息接口
 
@@ -216,14 +221,19 @@ GET /api/v1/chat/knowledge/stats
 ```
 
 ### T010 - 家庭健康 RAG 问答助手 ✅
-> 完成于 2026-04-24
+> 完成于 2026-04-24；v2 升级于 2026-04-24（参考 FamilyHealthyAgent 架构）
 
-- [x] RAG pipeline：检索知识片段 → 注入 Prompt → LLM 生成回答
+- [x] **Agentic 三工具 RAG**（并行检索 + 路由决策）
+  - 工具1 `check_red_flag`：红旗症状库，score > 0.72 直接触发急诊警告
+  - 工具2 `get_triage`：分诊导诊（"挂什么科" 等关键词触发）
+  - 工具3 `search_disease`：通用疾病/药物知识（默认）
+- [x] **多成员记忆隔离**（`_member_sessions[member_id]`，各成员独立对话历史）
+- [x] **成员健康档案注入**（从 DB 查询年龄/指标/用药，注入 system prompt）
+- [x] **老人/儿童个体化约束**（role=elder/child 时调整语言风格和注意事项）
 - [x] 多轮对话（ChatSession，最多保留 10 轮历史）
 - [x] 流式输出（SSE，`POST /api/v1/chat/stream`）
 - [x] 安全过滤（拒绝敏感词及非健康类问题）
-- [x] 成员健康背景注入（member_context）
-- [x] 会话管理（创建/复用/清除）
+- [x] 会话管理（`DELETE /sessions/me` 清除当前成员记忆）
 - [x] 知识来源引用（返回 sources 列表）
 - [x] 21 个测试全部通过（单元 12 + 集成 9）
 
@@ -354,6 +364,8 @@ DELETE /api/v1/chat/sessions/{id}  清空会话
 - [ ] 部署到云服务（阶段一：阿里云 ECS / 腾讯云）
 
 ---
+### T025 - 免责
+- [ ] 输出需要免责声明，结论仅供参考，需要请及时线下就医
 
 ## 优先级总览
 

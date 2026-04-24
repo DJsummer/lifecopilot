@@ -19,6 +19,9 @@ langchain-openai>=0.1.0
 langchain-qdrant>=0.1.0
 tiktoken>=0.7.0
 
+# 本地 Embedding + Reranker（USE_LOCAL_EMBEDDING=true 或 USE_RERANKER=true 时需要）
+# sentence-transformers>=2.7.0  # 取消注释以启用本地 bge-m3 + CrossEncoder
+
 # OCR
 paddlepaddle>=2.6.0; sys_platform != "darwin"
 paddleocr>=2.7.3

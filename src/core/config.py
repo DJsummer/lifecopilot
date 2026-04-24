@@ -57,6 +57,21 @@ class Settings(BaseSettings):
     LLM_MODEL: str = "gpt-4o"
     EMBEDDING_MODEL: str = "text-embedding-3-small"
 
+    # Embedding — 本地推理选项
+    # USE_LOCAL_EMBEDDING=true 时使用本地 bge-m3，false 时走 OpenAI API
+    USE_LOCAL_EMBEDDING: bool = False
+    LOCAL_EMBEDDING_MODEL: str = "BAAI/bge-m3"
+    EMBEDDING_DEVICE: str = "cpu"          # cpu / cuda / mps
+    EMBEDDING_BATCH_SIZE: int = 32
+    HF_CACHE_DIR: str = "/app/models"
+    EMBEDDING_DIM: int = 1536              # 1536=OpenAI，1024=bge-m3，768=bge-base-zh
+    EMBEDDING_CACHE_TTL: int = 86400 * 7  # Embedding 缓存 7 天
+
+    # 检索增强
+    USE_RERANKER: bool = False             # CrossEncoder rerank（需 sentence-transformers）
+    RERANKER_MODEL: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    QUERY_CACHE_TTL: int = 300             # 查询结果缓存 5 分钟（Redis）
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -20,7 +20,7 @@
 | 📱 Flutter App | ⬜ 计庒中 | iOS/Android，适配老人大字体 UI |
 | 💻 Web 管理后台 | ⬜ 计庒中 | React + Ant Design Pro，家庭健康总览 / 异常銄警 || 📊 健康数据录入 | ⬜ 计划中 | 血压/血糖/体重/心率等 10 种指标 |
 | 🔬 检验单 AI 解读 | ⬜ 计划中 | OCR 识别 + LLM 通俗解释异常项 |
-| 💬 健康 RAG 问答 | ⬜ 计划中 | 基于权威知识库的智能问诊助手 |
+| 💬 健康 RAG 问答 | ✅ 已完成 v2 | Agentic 三工具 + 多成员记忆隔离 + 表格感知分块 + Rerank |
 | 💊 用药管理提醒 | ⬜ 计划中 | 智能提醒 + 依从性追踪 |
 | 📈 慢病趋势预测 | ⬜ 计划中 | 时序模型预警血压/血糖异常趋势 |
 | 📝 健康周报/月报 | ⬜ 计划中 | 自动生成家庭健康趋势报告 |
@@ -32,9 +32,12 @@
 ```
 FastAPI ──► PostgreSQL  （用户/成员/用药/报告）
         ──► InfluxDB    （血压/心率等时序数据）
-        ──► Qdrant      （RAG 知识库向量检索）
-        ──► Redis       （缓存/任务队列）
+        ──► Qdrant      （RAG 知识库向量检索，支持 disease/red_flag/triage 三分区）
+        ──► Redis       （Embedding 缓存 7天 + 查询缓存 5分钟 + 任务队列）
         ──► Celery      （OCR/LLM 异步任务）
+
+RAG 层： EmbeddingService → Qdrant 向量检索 → CrossEncoder Rerank
+         → Agentic 路由（red_flag / triage / disease）→ LLM 生成
 
 微信小程序 ──► 日常用户端（血压录入/检验单/问诊）
 Flutter App ─► iOS / Android（老人友好大字体 UI）

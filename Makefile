@@ -85,3 +85,19 @@ test-e2e:      ## 运行 Selenium 端到端测试（需前端在运行）
 test-local:    ## 本地直接运行测试（不通过 Docker）
 	pip install -r requirements-test.txt -q
 	pytest tests/ -m "not e2e" -v
+
+# ── 知识库管理────────────────────────────────────────────────────────
+import-json:   ## 从 JSON 批量导入知识文章 (FILE=data/xxx.json)
+	python scripts/import_knowledge.py --json $(FILE) --qdrant-host localhost
+
+import-dir:    ## 导入整个目录的文档 (DIR=docs/ SOURCE=丁香医生 CATEGORY=内科)
+	python scripts/import_knowledge.py --dir $(DIR) --source "$(SOURCE)" --category "$(CATEGORY)" --qdrant-host localhost
+
+import-sample: ## 导入内置示例医学文章（用于快速测试）
+	python scripts/import_knowledge.py --json data/sample_articles.json --qdrant-host localhost
+
+dxy-crawl:     ## 抓取丁香医生文章并保存 (URL_FILE=data/dxy_urls.txt OUT=data/dxy_articles.json)
+	python scripts/dxy_crawler.py --url-file $(URL_FILE) --output $(OUT)
+
+dxy-import:    ## 抓取丁香医生文章并直接导入知识库 (URL_FILE=data/dxy_urls.txt)
+	python scripts/dxy_crawler.py --url-file $(URL_FILE) --import

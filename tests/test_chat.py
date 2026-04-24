@@ -88,7 +88,7 @@ class TestChatSession:
 class TestChatServiceSafety:
     def _make_service(self):
         mock_qdrant = AsyncMock()
-        knowledge_svc = KnowledgeService(mock_qdrant, openai_client=AsyncMock())
+        knowledge_svc = KnowledgeService(mock_qdrant)  # v2: embedding 由 embedding_service 管理
         mock_openai = AsyncMock()
         return ChatService(knowledge_svc, openai_client=mock_openai)
 

@@ -8,16 +8,23 @@ from src.core.config import settings
 
 # ── Collection 常量 ───────────────────────────────────────────────────
 HEALTH_KNOWLEDGE_COLLECTION = "health_knowledge"
-EMBEDDING_DIM = 1536  # text-embedding-3-small
+
+# 从 settings 读取 dim，支持切换模型（OpenAI=1536，bge-m3=1024，bge-base-zh=768）
+EMBEDDING_DIM: int = settings.EMBEDDING_DIM
+
+_client: AsyncQdrantClient | None = None
 
 
 def get_qdrant_client() -> AsyncQdrantClient:
-    """返回 Qdrant 异步客户端（每次调用返回同一实例）"""
-    return AsyncQdrantClient(
-        host=settings.QDRANT_HOST,
-        port=settings.QDRANT_PORT,
-        timeout=30,
-    )
+    """返回 Qdrant 异步客户端（单例）"""
+    global _client
+    if _client is None:
+        _client = AsyncQdrantClient(
+            host=settings.QDRANT_HOST,
+            port=settings.QDRANT_PORT,
+            timeout=30,
+        )
+    return _client
 
 
 async def ensure_collection(client: AsyncQdrantClient) -> None:
