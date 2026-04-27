@@ -12,3 +12,7 @@ from src.models.nutrition import (  # noqa: F401
     FoodItem, NutritionGoal, MealPlan, DietLog,
     DietType, MealType,
 )
+from src.models.exercise import (  # noqa: F401
+    FitnessAssessment, ExercisePlan, WorkoutLog,
+    FitnessLevel, ExerciseGoal, ExerciseType, WorkoutLogStatus,
+)

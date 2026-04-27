@@ -31,7 +31,7 @@ git push
 | 阶段一：基础架构搭建 | ✅ 已完成 | 100% |
 | 阶段二：核心健康监测 | ⬜ 未开始 | 0% |
 | 阶段三：智能问诊助手 | ✅ 已完成 | 100%（5/5 任务完成）|
-| 阶段四：生活方式干预 | 🔄 进行中 | 67%（2/3 任务完成，T015 待实现）|
+| 阶段四：生活方式干预 | ✅ 已完成 | 100%（3/3 任务全部完成）|
 | 阶段五：智能家居联动 | ⬜ 未开始 | 0% |
 | 阶段六：报告与就医辅助 | 🔄 进行中 | 75%（T018/T019/T020 完成，PDF/定时任务延后）|
 | 阶段七：前端与产品化 | ⬜ 未开始 | 0% |
@@ -326,11 +326,41 @@ GET  /api/v1/nutrition/{member_id}/diet-logs/summary      日摄入汇总
 DELETE /api/v1/nutrition/{member_id}/diet-logs/{id}       删除日志
 ```
 
-### T015 - 运动方案生成与追踪
-- [ ] 用户体能评估问卷设计
-- [ ] LLM 生成个性化运动计划（类型/强度/频率）
-- [ ] 接入运动数据追踪（步数/心率/卡路里）
-- [ ] 动态调整计划（基于执行情况和身体反馈）
+### T015 - 运动方案生成与追踪 ✅
+> 完成于 2026-05-01
+
+- [x] 体能评估问卷设计（fitness_level / primary_goal / available_days / limitations / equipment）
+  - upsert 机制：重复 POST 更新已有评估而不创建新记录
+  - 支持 5 种体能水平（久坐/初级/中级/高级/专业）
+  - 支持 6 种运动目标（减脂/增肌/提升心肺/维持健康/康复/柔韧性）
+- [x] LLM 生成个性化运动计划（类型/强度/频率）
+  - 7 天计划 JSON（每天含：休息/训练主题/具体动作/组数/热量估算/技巧提示）
+  - LLM 失败时静默降级为规则生成的基础有氧计划
+  - 支持 7 种运动类型（有氧/力量/柔韧/HIIT/球类/健步走/游泳）
+  - 新计划生成时自动将旧计划标记为 is_active=False
+- [x] 运动数据追踪（步数/心率/卡路里）
+  - METs 公式估算热量消耗（cardio: 7.0 / HIIT: 12.0 / walking: 3.5 等）
+  - 记录状态：completed / skipped / partial
+  - 心率上/下限校验（30-250 bpm）
+  - LLM 分析运动日志并生成个性化恢复建议
+- [x] 每周汇总统计（完成次数/总时长/总热量/平均心率）
+- [x] 活跃计划快速获取接口（`GET /plans/active`）
+- [x] 8 个 REST 端点：体能评估创建获取 / 计划生成列表获取 / 日志 CRUD / 每周汇总
+- [x] 38 个集成 + 单元测试（LLM 全部 mock），总计 307/307 通过
+- [x] Alembic 迁移：`0009_fitness`（fitness_assessments / exercise_plans / workout_logs）
+
+```
+POST /api/v1/fitness/{member_id}/assessment         创建/更新体能评估问卷
+GET  /api/v1/fitness/{member_id}/assessment         获取体能评估
+POST /api/v1/fitness/{member_id}/plans              LLM 生成本周运动计划
+GET  /api/v1/fitness/{member_id}/plans              计划列表
+GET  /api/v1/fitness/{member_id}/plans/active       当前活跃计划
+POST /api/v1/fitness/{member_id}/logs               记录一次运动日志
+GET  /api/v1/fitness/{member_id}/logs               日志列表（支持日期过滤）
+GET  /api/v1/fitness/{member_id}/logs/{id}          日志详情
+DELETE /api/v1/fitness/{member_id}/logs/{id}        删除日志
+GET  /api/v1/fitness/{member_id}/summary/weekly     每周运动汇总统计
+```
 
 ### T016 - 心理健康筛查 ✅
 > 完成于 2026-04-24

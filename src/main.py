@@ -18,6 +18,7 @@ from src.api.v1.routers import symptom as symptom_router
 from src.api.v1.routers import mental_health as mental_health_router
 from src.api.v1.routers import skin_analysis as skin_analysis_router
 from src.api.v1.routers import nutrition as nutrition_router
+from src.api.v1.routers import fitness as fitness_router
 
 log = structlog.get_logger()
 
@@ -64,4 +65,5 @@ app.include_router(symptom_router.router, prefix="/api/v1/symptoms", tags=["symp
 app.include_router(mental_health_router.router, prefix="/api/v1/mental-health", tags=["mental-health"])
 app.include_router(skin_analysis_router.router, prefix="/api/v1/skin", tags=["skin-analysis"])
 app.include_router(nutrition_router.router, prefix="/api/v1/nutrition", tags=["nutrition"])
+app.include_router(fitness_router.router, prefix="/api/v1/fitness", tags=["fitness"])
 
