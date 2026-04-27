@@ -60,6 +60,10 @@ class Member(BaseModel):
     health_reports: Mapped[list["HealthReport"]] = relationship(back_populates="member", cascade="all, delete-orphan")
     visit_summaries: Mapped[list["VisitSummary"]] = relationship(back_populates="member", cascade="all, delete-orphan")
     mental_health_logs: Mapped[list["MentalHealthLog"]] = relationship(back_populates="member", cascade="all, delete-orphan")
+    skin_analyses: Mapped[list["SkinAnalysis"]] = relationship(back_populates="member", cascade="all, delete-orphan")
+    nutrition_goal: Mapped[Optional["NutritionGoal"]] = relationship(back_populates="member", uselist=False, cascade="all, delete-orphan")
+    meal_plans: Mapped[list["MealPlan"]] = relationship(back_populates="member", cascade="all, delete-orphan")
+    diet_logs: Mapped[list["DietLog"]] = relationship(back_populates="member", cascade="all, delete-orphan")
 
 
 # 避免循环导入，延迟引用
@@ -68,3 +72,5 @@ from src.models.medication import Medication  # noqa: E402
 from src.models.report import LabReport, HealthReport  # noqa: E402
 from src.models.visit import VisitSummary  # noqa: E402
 from src.models.mental_health import MentalHealthLog  # noqa: E402
+from src.models.skin_analysis import SkinAnalysis  # noqa: E402
+from src.models.nutrition import NutritionGoal, MealPlan, DietLog  # noqa: E402

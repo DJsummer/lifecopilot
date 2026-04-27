@@ -7,3 +7,8 @@ from src.models.medication import (  # noqa: F401
     MedicationStatus, AdherenceStatus,
 )
 from src.models.report import LabReport, ReportType  # noqa: F401
+from src.models.skin_analysis import SkinAnalysis, SkinAnalysisResult  # noqa: F401
+from src.models.nutrition import (  # noqa: F401
+    FoodItem, NutritionGoal, MealPlan, DietLog,
+    DietType, MealType,
+)

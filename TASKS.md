@@ -1,7 +1,7 @@
 # LifePilot - 家庭健康管理 AI 项目任务清单
 
 > 创建日期：2026-04-24  
-> 最后更新：2026-04-24（T016 心理健康筛查：PHQ-9/GAD-7 量表自动评分 + 情绪日记 NLP 分析 + 风险预警，214 个测试全部通过）  
+> 最后更新：2026-04-27（T014 个性化营养规划：营养目标 LLM 生成 + 每周食谱 + 饮食日志分析，32 个测试全部通过）  
 > 目标：用 AI 技术实现一套家庭健康管理系统
 
 ---
@@ -30,8 +30,8 @@ git push
 | 阶段零：部署基础设施 | ✅ 已完成 | 100% |
 | 阶段一：基础架构搭建 | ✅ 已完成 | 100% |
 | 阶段二：核心健康监测 | ⬜ 未开始 | 0% |
-| 阶段三：智能问诊助手 | 🔄 进行中 | 80%（4/5 任务完成，T013 待实现）|
-| 阶段四：生活方式干预 | 🔄 进行中 | 33%（1/3 任务完成，T014/T015 待实现）|
+| 阶段三：智能问诊助手 | ✅ 已完成 | 100%（5/5 任务完成）|
+| 阶段四：生活方式干预 | 🔄 进行中 | 67%（2/3 任务完成，T015 待实现）|
 | 阶段五：智能家居联动 | ⬜ 未开始 | 0% |
 | 阶段六：报告与就医辅助 | 🔄 进行中 | 75%（T018/T019/T020 完成，PDF/定时任务延后）|
 | 阶段七：前端与产品化 | ⬜ 未开始 | 0% |
@@ -266,22 +266,65 @@ DELETE /api/v1/chat/sessions/{id}  清空会话
 - [x] PDF / 图片 / TXT 上传接口（≤20 MB，文件类型校验）
 - [x] 20 个集成 + 单元测试（OCR & OpenAI 全部 mock）
 
-### T013 - 皮肤/伤口照片辅助分析
-- [ ] 接入多模态模型（GPT-4o Vision / LLaVA）
-- [ ] 开发图片上传与预处理流程
-- [ ] 输出初步判断（正常/关注/建议就医）+ 免责声明
-- [ ] 日志记录所有分析请求（用于审计）
+### T013 - 皮肤/伤口照片辅助分析 ✅
+> 完成于 2026-04-27
+
+- [x] 接入多模态模型（三后端可选）
+  - `openai`：GPT-4o / 任何 OpenAI 兼容供应商（DeepSeek-VL2 / Moonshot / Qwen VL API / 智谱 GLM-4V / Azure OpenAI）
+  - `ollama`：本地 Ollama 服务（Qwen2-VL:7b / LLaVA 等），OpenAI 兼容接口
+  - `local`：transformers 本地推理（Qwen2-VL-Instruct），线程池执行，不阻塞事件循环
+- [x] 专用 `SKIN_VISION_API_KEY` / `SKIN_VISION_BASE_URL`（空时回退全局 OpenAI 配置）
+- [x] 图片上传与预处理（JPEG/PNG/WEBP/BMP，≤10 MB，base64 编码传模型）
+- [x] LLM 结构化输出：findings / possible_conditions / care_advice / summary
+- [x] 输出结果等级：normal / attention / visit_soon / emergency
+- [x] 图片本地存储（`data/skin_images/`）+ 审计字段（使用模型记录）
+- [x] LLM 失败静默降级（图片路径保留，分析标 attention）
+- [x] 免责声明自动附加
+- [x] 4 个 REST 端点：上传分析 / 列表 / 详情 / 删除
+- [x] 23 个集成 + 单元测试（LLM 全部 mock），总计 255/255 通过
+- [x] Alembic 迁移：`0007_skin_analyses`
+
+```
+POST /api/v1/skin/{member_id}/analyze       上传照片 + AI 辅助分析
+GET  /api/v1/skin/{member_id}/analyses      历史分析列表（可按 result 过滤）
+GET  /api/v1/skin/{member_id}/analyses/{id} 详情
+DELETE /api/v1/skin/{member_id}/analyses/{id} 删除
+```
 
 ---
 
 ## 阶段四：生活方式干预
 
-### T014 - 个性化营养规划
-- [ ] 建立食物营养数据库（接入 USDA FoodData / 中国食物成分表）
-- [ ] 基于健康档案和实验室指标生成营养目标
-- [ ] LLM 生成个性化每周食谱
-- [ ] 支持饮食偏好和过敏原设置
-- [ ] 对接超市 API 或生成购物清单
+### T014 - 个性化营养规划 ✅
+> 完成于 2026-04-27
+
+- [x] 食物营养素数据库（模型 + 模糊搜索 API）
+- [x] 基于健康档案生成营养目标
+  - Harris-Benedict 公式计算 BMR ＋活动系数（TDEE）作为算法基准
+  - LLM 个性化调整（饮食类型 / 过敏原 / 禁忌 / 用药考虑）
+  - LLM 失败时静默降级为公式默认值
+- [x] 支持 9 种饮食类型（普通/素食/纯素/低碳/低盐/低糖/低脂/高蛋白/无麦质）
+- [x] LLM 生成个性化每周食谱（7 天 × 3 餐 + 加餐，符合中国饮食习惯）
+- [x] 饮食日志录入（自由文本）+ LLM 营养素估算（卡路里/蛋白质/脂肪/碳水化合物）+ 健康反馈
+- [x] 日摄入汇总表（各餐汇总当日全部营养素）
+- [x] upsert 营养目标（重复 POST 更新而不重复）
+- [x] 8 个 REST 端点：食物搜索 / 目标生成获取 / 食谱列表详情删除 / 日志列表详情删除 / 日摄入汇总
+- [x] 32 个集成 + 单元测试（LLM 全部 mock），总计 269/269 通过
+- [x] Alembic 迁移：`0008_nutrition`（food_items / nutrition_goals / meal_plans / diet_logs）
+
+```
+GET  /api/v1/nutrition/foods                              食物搜索
+POST /api/v1/nutrition/{member_id}/goal                   创建/更新营养目标
+GET  /api/v1/nutrition/{member_id}/goal                   获取营养目标
+POST /api/v1/nutrition/{member_id}/meal-plans             生成本周食谱
+GET  /api/v1/nutrition/{member_id}/meal-plans             食谱列表
+GET  /api/v1/nutrition/{member_id}/meal-plans/{id}        食谱详情
+DELETE /api/v1/nutrition/{member_id}/meal-plans/{id}      删除食谱
+POST /api/v1/nutrition/{member_id}/diet-logs              记录饮食
+GET  /api/v1/nutrition/{member_id}/diet-logs              日志列表
+GET  /api/v1/nutrition/{member_id}/diet-logs/summary      日摄入汇总
+DELETE /api/v1/nutrition/{member_id}/diet-logs/{id}       删除日志
+```
 
 ### T015 - 运动方案生成与追踪
 - [ ] 用户体能评估问卷设计

@@ -1,9 +1,9 @@
 # LifePilot — 系统架构设计文档
 
-> 版本：v0.5  
-> 日期：2026-04-24  
+> 版本：v1.0  
+> 日期：2026-04-27  
 > 状态：进行中  
-> 变更：T012 完成（检验单 AI 解读）：OCR + LLM 结构化解读 + 异常标注 + 趋势对比 API，102 个测试全部通过
+> 变更：T013/T014 完成（皮肤/伤口照片分析 + 个性化营养规划），269 个测试全部通过
 
 ---
 
@@ -219,7 +219,7 @@ results = client.search(
 | Embedding | text-embedding-3-small | 性价比最优，1536 维，中文支持好，成本约为 large 的 1/5 |
 | RAG 框架 | LangChain | 成熟的 Pipeline 编排，内置文档分块/检索/历史管理，社区活跃 |
 | OCR | PaddleOCR | 百度开源，中文检验单识别准确率业界领先，本地运行无 API 费用 |
-| 多模态 | GPT-4o Vision | 皮肤/伤口照片分析，多模态理解能力目前最强 |
+| 皮肤视觉分析 | GPT-4o Vision / Ollama / 本地 Qwen2-VL | 逺过 `SKIN_VISION_BACKEND` 切换，支持多供应商 Key |
 
 ---
 
@@ -263,7 +263,16 @@ Family
                 ├── n  Medication         (用药方案)
                 │        ├── n  MedicationReminder  (提醒时间配置)
                 │        └── n  AdherenceLog        (服药依从性记录)
-                └── n  LabReport          (检验报告 + OCR + LLM 解读)
+                ├── n  LabReport          (检验报告 + OCR + LLM 解读)
+                ├── n  HealthReport       (周报/月报 + LLM 总结)
+                ├── n  VisitSummary       (就医准备摘要)
+                ├── n  MentalHealthLog    (PHQ-9/GAD-7 量表 + 情绪日记)
+                ├── n  SkinAnalysis       (皮肤/伤口照片分析记录)
+                ├── 1  NutritionGoal      (营养目标，每人唯一)
+                ├── n  MealPlan           (每周食谱)
+                └── n  DietLog            (饮食日志记录)
+
+FoodItem  (食物营养素数据库，独立表)
 ```
 
 #### 核心表说明

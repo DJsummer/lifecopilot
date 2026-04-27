@@ -4,7 +4,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.9-blue)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-green)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/Tests-214%2F214-brightgreen)](#testing)
+[![Tests](https://img.shields.io/badge/Tests-269%2F269-brightgreen)](#testing)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://docs.docker.com/compose/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -26,6 +26,8 @@
 | 🏥 Pre-Visit Assistant | ✅ Done v1 | Structured visit summary (ZH/EN) + auto-aggregated medication / metrics / lab snapshots |
 | 📝 Symptom Diary NLP | ✅ Done v1 | LLM symptom extraction + severity score (1-10) + visit advice level |
 | 🧠 Mental Health Screening | ✅ Done v1 | PHQ-9/GAD-7 scoring + emotion diary NLP + risk alert + intervention resources |
+| 🩺 Skin / Wound Photo Analysis | ✅ Done | GPT-4o / Ollama / local Qwen2-VL · multi-provider API key support |
+| 🥗 Personalised Nutrition Plan | ✅ Done | BMR formula + LLM nutrition goals + weekly meal plan + diet log analysis |
 | 📈 Chronic Disease Prediction | ⬜ Planned | Time-series model for BP / glucose trend alerts |
 
 ---
