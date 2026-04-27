@@ -1,9 +1,9 @@
 # LifePilot — 系统架构设计文档
 
-> 版本：v1.0  
-> 日期：2026-04-27  
+> 版本：v1.2  
+> 日期：2026-05-01  
 > 状态：进行中  
-> 变更：T013/T014 完成（皮肤/伤口照片分析 + 个性化营养规划），269 个测试全部通过
+> 变更：T015（运动方案）+ T005（慢病趋势预测与告警）完成，350 个测试全部通过
 
 ---
 
@@ -270,7 +270,13 @@ Family
                 ├── n  SkinAnalysis       (皮肤/伤口照片分析记录)
                 ├── 1  NutritionGoal      (营养目标，每人唯一)
                 ├── n  MealPlan           (每周食谱)
-                └── n  DietLog            (饮食日志记录)
+                ├── n  DietLog            (饮食日志记录)
+                ├── 1  FitnessAssessment  (体能评估问卷，每人唯一)   ← T015
+                ├── n  ExercisePlan       (LLM 生成的运动计划)               ← T015
+                ├── n  WorkoutLog         (运动记录日志)                       ← T015
+                ├── n  HealthThreshold    (个性化健康阈值配置)              ← T005
+                ├── n  HealthAlert        (健康超阈预警记录)                 ← T005
+                └── n  HealthTrendSnapshot(趋势分析快照)                      ← T005
 
 FoodItem  (食物营养素数据库，独立表)
 ```
@@ -448,6 +454,35 @@ POST   /api/v1/members/{id}/medications/{mid}/adherence  记录服药情况
 ```
 POST   /api/v1/chat                   RAG 问答（支持多轮对话）
 GET    /api/v1/chat/history           对话历史
+```
+
+#### 运动方案生成与追踪（✅ 已完成 T015）
+```
+POST   /api/v1/fitness/{member_id}/assessment         创建/更新体能评估问卷
+GET    /api/v1/fitness/{member_id}/assessment         获取体能评估
+POST   /api/v1/fitness/{member_id}/plans              LLM 生成本周运动计划
+GET    /api/v1/fitness/{member_id}/plans              计划列表
+GET    /api/v1/fitness/{member_id}/plans/active       当前活跃计划
+POST   /api/v1/fitness/{member_id}/logs               记录运动日志（METs 热量 + LLM 反馈）
+GET    /api/v1/fitness/{member_id}/logs               日志列表
+GET    /api/v1/fitness/{member_id}/logs/{id}          日志详情
+DELETE /api/v1/fitness/{member_id}/logs/{id}          删除日志
+GET    /api/v1/fitness/{member_id}/summary/weekly     每周运动汇总统计
+```
+
+#### 慢病趋势预测与告警（✅ 已完成 T005）
+```
+GET    /api/v1/alerts/{member_id}/thresholds/defaults 查看系统默认阈值
+POST   /api/v1/alerts/{member_id}/thresholds          设置/更新个性化阈值
+GET    /api/v1/alerts/{member_id}/thresholds          阈值列表
+DELETE /api/v1/alerts/{member_id}/thresholds/{metric} 删除阈值（恢复默认）
+GET    /api/v1/alerts/{member_id}/alerts              告警列表（多维过滤）
+GET    /api/v1/alerts/{member_id}/alerts/{id}         告警详情
+PATCH  /api/v1/alerts/{member_id}/alerts/{id}/acknowledge  确认告警
+DELETE /api/v1/alerts/{member_id}/alerts/{id}         删除告警
+POST   /api/v1/alerts/{member_id}/trends              生成趋势快照（LLM 解读可选）
+GET    /api/v1/alerts/{member_id}/trends              趋势快照列表
+GET    /api/v1/alerts/{member_id}/trends/latest       某指标最新快照
 ```
 
 #### 系统

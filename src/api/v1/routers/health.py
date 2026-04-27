@@ -26,6 +26,7 @@ from src.core.database import get_db
 from src.core.deps import get_current_member, require_same_family
 from src.models.health import HealthRecord, MetricType
 from src.models.member import Member
+from src.services.alert_service import check_and_create_alert
 
 log = structlog.get_logger()
 router = APIRouter()
@@ -65,6 +66,20 @@ async def create_record(
     db.add(record)
     await db.commit()
     await db.refresh(record)
+
+    # 自动检测阈值告警（静默降级，不阻塞录入）
+    try:
+        await check_and_create_alert(
+            member_id=member_id,
+            metric_type=body.metric_type.value,
+            value=body.value,
+            triggered_at=record.measured_at,
+            db=db,
+        )
+        await db.commit()
+    except Exception as exc:
+        log.warning("告警检测失败（静默忽略）: %s", exc)
+
     log.info("health record created", member_id=str(member_id), metric=body.metric_type)
     return record
 

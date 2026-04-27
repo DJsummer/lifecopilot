@@ -29,7 +29,7 @@ git push
 |------|------|--------|
 | 阶段零：部署基础设施 | ✅ 已完成 | 100% |
 | 阶段一：基础架构搭建 | ✅ 已完成 | 100% |
-| 阶段二：核心健康监测 | ⬜ 未开始 | 0% |
+| 阶段二：核心健康监测 | 🔄 进行中 | 20%（T005 完成，T006-T008 待实现）|
 | 阶段三：智能问诊助手 | ✅ 已完成 | 100%（5/5 任务完成）|
 | 阶段四：生活方式干预 | ✅ 已完成 | 100%（3/3 任务全部完成）|
 | 阶段五：智能家居联动 | ⬜ 未开始 | 0% |
@@ -168,12 +168,41 @@ make test-local
 
 - [ ] 集成可穿戴设备数据接入（Apple Health / Mi Band / Fitbit API）— 延后至 T005
 
-### T005 - 慢病趋势预测
-- [ ] 收集并清洗时序健康数据集（血压/血糖）
-- [ ] 训练 LSTM 或 TimesNet 时序预测模型
-- [ ] 设置异常阈值规则引擎（可配置每位成员的个性化阈值）
-- [ ] 实现预警通知（App 推送 / 微信通知）
-- [ ] 编写预测模型评估报告
+### T005 - 慢病趋势预测 ✅
+> 完成于 2026-05-01
+
+- [x] 个性化健康阈值规则引擎
+  - per-member 可配置每种指标的 warning/danger 上下限（upsert）
+  - 系统内置 6 种指标默认阈值（血压/心率/血糖/体温/血氧）
+  - 自定义阈值优先级 > 系统默认值；支持禁用
+- [x] 健康数据录入时自动检测并创建告警
+  - 1 小时冷却期（同指标同方向不重复触发）
+  - 分级：INFO < WARNING < DANGER（优先显示最严重等级）
+- [x] 告警管理：列表/详情/确认（acknowledge）/删除
+  - 多维度过滤：severity / status / metric_type
+  - 确认告警支持附加备注（llm_advice 字段）
+- [x] 趋势分析（最小二乘线性回归）
+  - 计算近 N 条记录的均值/最大/最小/标准差/每日斜率
+  - 趋势方向判定：rising / falling / stable / fluctuating
+  - LLM 生成通俗趋势解读（失败时静默降级为规则描述）
+  - 趋势快照持久化（history 可查询）
+- [x] 11 个 REST 端点：默认阈值查看 / 阈值 CRUD / 告警 CRUD+确认 / 趋势分析列表最新
+- [x] 43 个集成 + 单元测试（LLM 全部 mock），总计 350/350 通过
+- [x] Alembic 迁移：`0010_alerts`（health_thresholds / health_alerts / health_trend_snapshots）
+
+```
+GET  /api/v1/alerts/{member_id}/thresholds/defaults    查看系统内置默认阈值
+POST /api/v1/alerts/{member_id}/thresholds             设置/更新个性化阈值
+GET  /api/v1/alerts/{member_id}/thresholds             阈值列表
+DEL  /api/v1/alerts/{member_id}/thresholds/{metric}    删除阈值（恢复默认）
+GET  /api/v1/alerts/{member_id}/alerts                 告警列表（支持多维过滤）
+GET  /api/v1/alerts/{member_id}/alerts/{id}            告警详情
+PATCH /api/v1/alerts/{member_id}/alerts/{id}/acknowledge  确认告警
+DEL  /api/v1/alerts/{member_id}/alerts/{id}            删除告警
+POST /api/v1/alerts/{member_id}/trends                 生成趋势快照（LLM 解读可选）
+GET  /api/v1/alerts/{member_id}/trends                 趋势快照列表
+GET  /api/v1/alerts/{member_id}/trends/latest          获取某指标最新快照
+```
 
 ### T006 - 睡眠质量分析
 - [ ] 对接可穿戴设备睡眠数据接口

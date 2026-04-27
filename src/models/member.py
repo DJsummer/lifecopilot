@@ -67,6 +67,9 @@ class Member(BaseModel):
     fitness_assessment: Mapped[Optional["FitnessAssessment"]] = relationship(back_populates="member", uselist=False, cascade="all, delete-orphan")
     exercise_plans: Mapped[list["ExercisePlan"]] = relationship(back_populates="member", cascade="all, delete-orphan")
     workout_logs: Mapped[list["WorkoutLog"]] = relationship(back_populates="member", cascade="all, delete-orphan")
+    health_thresholds: Mapped[list["HealthThreshold"]] = relationship(back_populates="member", cascade="all, delete-orphan")
+    health_alerts: Mapped[list["HealthAlert"]] = relationship(back_populates="member", cascade="all, delete-orphan")
+    health_trend_snapshots: Mapped[list["HealthTrendSnapshot"]] = relationship(back_populates="member", cascade="all, delete-orphan")
 
 
 # 避免循环导入，延迟引用
@@ -78,3 +81,4 @@ from src.models.mental_health import MentalHealthLog  # noqa: E402
 from src.models.skin_analysis import SkinAnalysis  # noqa: E402
 from src.models.nutrition import NutritionGoal, MealPlan, DietLog  # noqa: E402
 from src.models.exercise import FitnessAssessment, ExercisePlan, WorkoutLog  # noqa: E402
+from src.models.health_alert import HealthThreshold, HealthAlert, HealthTrendSnapshot  # noqa: E402

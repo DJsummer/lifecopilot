@@ -16,3 +16,7 @@ from src.models.exercise import (  # noqa: F401
     FitnessAssessment, ExercisePlan, WorkoutLog,
     FitnessLevel, ExerciseGoal, ExerciseType, WorkoutLogStatus,
 )
+from src.models.health_alert import (  # noqa: F401
+    HealthThreshold, HealthAlert, HealthTrendSnapshot,
+    AlertSeverity, AlertStatus, TrendDirection,
+)
