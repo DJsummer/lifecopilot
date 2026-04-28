@@ -167,7 +167,7 @@ async def generate_fall_risk_recommendations(
 4. 运动/康复建议"""
 
         resp = await client.chat.completions.create(
-            model=settings.OPENAI_MODEL,
+            model=settings.LLM_MODEL,
             messages=[{"role": "user", "content": prompt}],
             max_tokens=400,
             temperature=0.5,

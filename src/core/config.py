@@ -108,6 +108,14 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "/app/uploads"
     MAX_FILE_SIZE_MB: int = 20
 
+    # 限流（T024）
+    RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_AUTH: str = "10/minute"      # 登录/注册防暴力破解
+    RATE_LIMIT_LLM: str = "30/minute"       # LLM 问答类
+    RATE_LIMIT_VISION: str = "20/minute"    # 视觉分析（GPT-4V）
+    RATE_LIMIT_WEBHOOK: str = "60/minute"   # 传感器 Webhook
+    RATE_LIMIT_DEFAULT: str = "200/minute"  # 其他接口默认
+
 
 @lru_cache
 def get_settings() -> Settings:

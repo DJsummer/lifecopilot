@@ -3,7 +3,7 @@ import secrets
 import uuid
 
 import structlog
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from jose import JWTError, jwt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,6 +21,7 @@ from src.api.v1.schemas.auth import (
 )
 from src.core.database import get_db
 from src.core.deps import get_current_admin, get_current_member, require_same_family
+from src.core.rate_limit import limiter, LIMIT_AUTH
 from src.core.security import (
     ALGORITHM,
     create_access_token,
@@ -39,7 +40,8 @@ router = APIRouter()
 # 注册家庭账户（同时创建第一个 admin 成员）
 # ───────────────────────────────────────────────
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
-async def register(body: FamilyRegisterRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit(LIMIT_AUTH)
+async def register(request: Request, body: FamilyRegisterRequest, db: AsyncSession = Depends(get_db)):
     # 邮箱唯一性检查
     existing = await db.scalar(select(Member).where(Member.email == body.email))
     if existing:
@@ -75,7 +77,8 @@ async def register(body: FamilyRegisterRequest, db: AsyncSession = Depends(get_d
 # 登录
 # ───────────────────────────────────────────────
 @router.post("/login", response_model=TokenResponse)
-async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit(LIMIT_AUTH)
+async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends(get_db)):
     member = await db.scalar(select(Member).where(Member.email == body.email))
     if not member or not member.hashed_password or not verify_password(body.password, member.hashed_password):
         raise HTTPException(

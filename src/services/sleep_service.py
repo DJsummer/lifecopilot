@@ -232,7 +232,7 @@ async def generate_sleep_advice(
 请给出 3-4 条针对性建议，重点说明最需要改善的点。"""
 
         resp = await client.chat.completions.create(
-            model=settings.OPENAI_MODEL,
+            model=settings.LLM_MODEL,
             messages=[{"role": "user", "content": prompt}],
             max_tokens=300,
             temperature=0.5,

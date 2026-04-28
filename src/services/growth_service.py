@@ -411,7 +411,7 @@ async def generate_growth_assessment(
 3. 1-2 条具体建议（饮食/运动/就诊）"""
 
         resp = await client.chat.completions.create(
-            model=settings.OPENAI_MODEL,
+            model=settings.LLM_MODEL,
             messages=[{"role": "user", "content": prompt}],
             max_tokens=300,
             temperature=0.5,

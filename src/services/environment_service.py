@@ -252,7 +252,7 @@ async def generate_environment_advice(
         )
 
         resp = await client.chat.completions.create(
-            model=settings.OPENAI_MODEL,
+            model=settings.LLM_MODEL,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.4,
             max_tokens=500,

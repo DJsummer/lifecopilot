@@ -1,7 +1,7 @@
 # LifePilot - 家庭健康管理 AI 项目任务清单
 
 > 创建日期：2026-04-24  
-> 最后更新：2026-05-01（T017 环境健康监控：PM2.5/CO₂/温湿度传感器 + 健康阈值耦警 + 小米/Home Assistant 接入 + LLM 建议，52 个测试全部通过）  
+> 最后更新：2026-05-01（T024 API安全与服务化：限流+OWASP安全头+请求跟踪+输入校验, 23个测试全部通过）  
 > 目标：用 AI 技术实现一套家庭健康管理系统
 
 ---
@@ -583,10 +583,27 @@ POST   /api/v1/environment/{member_id}/webhook/home-assistant    Home Assistant 
 - [ ] 用药依从性统计图表
 - [ ] Docker Compose 集成部署（Nginx 服务前端静态资源）
 
-### T024 - API 服务化与部署
-- [ ] 编写 OpenAPI 文档（已通过 FastAPI 自动生成）
-- [ ] 实现限流与安全防护（Rate Limiting、输入校验）
-- [ ] 部署到云服务（阶段一：阿里云 ECS / 腾讯云）
+### T024 - API 服务化与安全防护 ✅
+> 完成于 2026-05-01
+
+- [x] 实现限流与安全防护（slowapi + OWASP安全头 + 请求跟踪）
+  - SecurityHeadersMiddleware：X-Content-Type-Options / X-Frame-Options / X-XSS-Protection /
+    Referrer-Policy / Permissions-Policy / Content-Security-Policy /
+    Cache-Control（API路径禁缓存）
+  - RequestIDMiddleware：X-Request-ID 请求唯一 ID（客户端传入则氲用）
+  - ProcessTimeMiddleware：X-Process-Time 响应耗时（ms）
+  - slowapi 限流：登录/注册 10次/分钟，LLM 30次/分，视觅 20次/分，Webhook 60次/分
+  - 限流 Key：Bearer令牌前16位（已认证）或客户端 IP（匿名）
+  - 测试环境自动设置宽松限额（10000/分），不干扰现有测试
+- [x] 输入安全校验
+  - Pydantic拦截SQL注入尝试（邮笱格式校验）
+  - XSS payload 宼入后 API返回 JSON（不渲染HTML）
+  - 无效 UUID 路径参数返回 422
+  - 越界页大小参数返回 422
+- [x] 修复潜在 Bug：4 个服务层使用 settings.OPENAI_MODEL（不存在字段）→ settings.LLM_MODEL
+- [x] OpenAPI 文档：FastAPI 自动生成（/docs，介发环境可FFF--仅开放）
+- [x] 23 个集成 + 单元测试，总计 510/510 通过
+- [ ] 部署到云服务（阶段一：阳云ECS / 腾讯云）— 延后实现
 
 ---
 ### T025 - 免责

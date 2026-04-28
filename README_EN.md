@@ -4,7 +4,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.9-blue)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-green)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/Tests-487%2F487-brightgreen)](#testing)
+[![Tests](https://img.shields.io/badge/Tests-510%2F510-brightgreen)](#testing)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://docs.docker.com/compose/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -254,7 +254,7 @@ pip install -r requirements-test.txt
 python -m pytest tests/ --ignore=tests/e2e -v
 ```
 
-**Test status: 487 / 487 passing ✅**
+**Test status: 510 / 510 passing ✅**
 
 | Test file | Coverage | Count |
 |-----------|----------|-------|
@@ -277,6 +277,7 @@ python -m pytest tests/ --ignore=tests/e2e -v
 | `test_growth.py` | Child growth / WHO percentile / milestones | 32 |
 | `test_fall_risk.py` | Fall risk assessment / inactivity detection / scoring | 28 |
 | `test_environment.py` | Env records / threshold alerts / Webhook / LLM advice | 52 |
+| `test_middleware.py` | Security headers / request ID / timing / rate limit / input validation | 23 |
 | `test_system.py` | Health check | 2 |
 
 ---

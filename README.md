@@ -6,7 +6,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.9-blue)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-green)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/Tests-487%2F487-brightgreen)](#测试)
+[![Tests](https://img.shields.io/badge/Tests-510%2F510-brightgreen)](#测试)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://docs.docker.com/compose/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -34,6 +34,7 @@
 | 👶 児童生长发育评估 | ✅ 已完成 | WHO LMS 百分位 + Z-score + 5类里程碑追踪 + LLM 报告 |
 | 👴 老人跌倒风险评估 | ✅ 已完成 | 改进版 Morse/Hendrich II 评分 + 不活动检测 + 紧急联系人告警 + LLM 干预建议 |
 | 🌡️ 环境健康监控 | ✅ 已完成 | PM2.5/CO₂/温湿度/VOC/噪音 + WHO阈值耦警 + 小米/Home Assistant接入 + LLM建议 |
+| 🔒 API 限流与安全防护 | ✅ 已完成 | OWASP安全头 + slowapi限流 + X-Request-ID请求跟踪 + 输入校验 |
 
 ---
 
@@ -383,7 +384,7 @@ pip install -r requirements-test.txt
 python -m pytest tests/ --ignore=tests/e2e -v
 ```
 
-**测试状态：487/487 通过 ✅**
+**测试状态：510/510 通过 ✅**
 
 | 测试文件 | 内容 | 数量 |
 |----------|------|------|
