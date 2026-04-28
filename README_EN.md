@@ -4,7 +4,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.9-blue)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-green)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/Tests-407%2F407-brightgreen)](#testing)
+[![Tests](https://img.shields.io/badge/Tests-435%2F435-brightgreen)](#testing)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://docs.docker.com/compose/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -32,6 +32,7 @@
 | 🔔 Chronic Disease Alerts | ✅ Done | Per-member threshold engine + auto-alerts on entry + linear trend analysis + LLM insight |
 | 😴 Sleep Quality Analysis | ✅ Done | Multi-factor scoring + apnea risk detection + N-day trend summary + LLM improvement advice |
 | 👶 Child Growth & Development | ✅ Done | WHO LMS percentile + Z-score + 5-category milestone tracking + LLM report |
+| 👴 Elderly Fall Risk Assessment | ✅ Done | Enhanced Morse/Hendrich II scoring + inactivity detection + emergency contact alert + LLM intervention |
 
 ---
 
@@ -252,7 +253,7 @@ pip install -r requirements-test.txt
 python -m pytest tests/ --ignore=tests/e2e -v
 ```
 
-**Test status: 214 / 214 passing ✅**
+**Test status: 435 / 435 passing ✅**
 
 | Test file | Coverage | Count |
 |-----------|----------|-------|
@@ -267,6 +268,13 @@ python -m pytest tests/ --ignore=tests/e2e -v
 | `test_visit.py` | Pre-visit summary generate / list / detail / delete | 21 |
 | `test_symptom.py` | Symptom diary NLP / list / detail / delete | 20 |
 | `test_mental_health.py` | PHQ-9/GAD-7 scoring + emotion diary NLP | 27 |
+| `test_skin_analysis.py` | Skin/wound photo analysis (3 backends + multi-provider) | 23 |
+| `test_nutrition.py` | Nutrition goals / meal plan / food log / service unit | 32 |
+| `test_exercise.py` | Exercise plan / session tracking / weekly summary | 38 |
+| `test_alerts.py` | Chronic disease thresholds / alerts / trend analysis | 43 |
+| `test_sleep.py` | Sleep records / scoring / trend summary | 25 |
+| `test_growth.py` | Child growth / WHO percentile / milestones | 32 |
+| `test_fall_risk.py` | Fall risk assessment / inactivity detection / scoring | 28 |
 | `test_system.py` | Health check | 2 |
 
 ---

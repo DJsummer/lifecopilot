@@ -25,3 +25,7 @@ from src.models.growth import (  # noqa: F401
     GrowthRecord, DevelopmentMilestone,
     GrowthCategory, MilestoneType, MilestoneStatus,
 )
+from src.models.fall_risk import (  # noqa: F401
+    FallRiskAssessment, InactivityLog,
+    FallRiskLevel, ActivityStatus,
+)

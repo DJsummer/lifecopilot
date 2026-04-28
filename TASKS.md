@@ -1,7 +1,7 @@
 # LifePilot - 家庭健康管理 AI 项目任务清单
 
 > 创建日期：2026-04-24  
-> 最后更新：2026-05-01（T007 児童生长发育评估：WHO LMS 百分位计算 + 里程碑追踪 + LLM 评估，32 个测试全部通过）  
+> 最后更新：2026-05-01（T008 老人跌倒风险评估：改进 Morse/Hendrich II 评分 + 不活动检测 + LLM 干预建议，28 个测试全部通过）  
 > 目标：用 AI 技术实现一套家庭健康管理系统
 
 ---
@@ -29,7 +29,7 @@ git push
 |------|------|--------|
 | 阶段零：部署基础设施 | ✅ 已完成 | 100% |
 | 阶段一：基础架构搭建 | ✅ 已完成 | 100% |
-| 阶段二：核心健康监测 | 🔄 进行中 | 60%（T005/T006/T007 完成，T008 待实现）|
+| 阶段二：核心健康监测 | 🔄 进行中 | 80%（T005/T006/T007/T008 完成，T009+ 属阶段三）|
 | 阶段三：智能问诊助手 | ✅ 已完成 | 100%（5/5 任务完成）|
 | 阶段四：生活方式干预 | ✅ 已完成 | 100%（3/3 任务全部完成）|
 | 阶段五：智能家居联动 | ⬜ 未开始 | 0% |
@@ -259,11 +259,34 @@ DELETE /api/v1/growth/{member_id}/milestones/{id}      删除自定义里程碑
 GET    /api/v1/growth/{member_id}/summary              生长概览（最新记录+里程碑统计）
 ```
 
-### T008 - 老人跌倒风险评估
-- [ ] 定义跌倒风险评估指标（活动频率、步态数据、疾病史）
-- [ ] 开发风险评分模型
-- [ ] 实现长时间不活动异常检测（接入智能家居传感器）
-- [ ] 紧急联系人告警推送
+### T008 - 老人跌倒风险评估 ✅
+> 完成于 2026-05-01
+
+- [x] 定义跌倒风险评估指标（改进版 Morse Fall Scale + Hendrich II 合并，11 项 boolean 维度）
+- [x] 开发风险评分模型（总分 0-28，LOW/MODERATE/HIGH/VERY_HIGH，年龄调整 +1/+2）
+  - has_fall_history(+3) / has_osteoporosis(+2) / has_neurological_disease(+3)
+  - uses_sedatives(+2) / has_gait_disorder(+3) / uses_walking_aid(+2)
+  - has_vision_impairment(+2) / has_weakness_or_balance_issue(+3)
+  - lives_alone(+2) / frequent_nocturia(+2) / has_urge_incontinence(+2)
+- [x] 实现长时间不活动检测（查询最后 steps/heart_rate 记录时间，超阈值创建 InactivityLog）
+  - 30 分钟去重窗口防止重复告警
+  - 可配置 threshold_hours（1-24h，默认 4h）
+- [x] 紧急联系人告警消息生成（InactivityLog.alert_message）
+- [x] LLM 生成个性化干预建议（失败时静默降级为规则建议）
+- [x] 8 个 REST 端点：评估 CRUD（含最新/列表/过滤）+ 不活动检测+列表 + 概览
+- [x] 28 个集成 + 单元测试（LLM 全部 mock），总计 435/435 通过
+- [x] Alembic 迁移：`0013_fall_risk`（fall_risk_assessments / inactivity_logs）
+
+```
+POST   /api/v1/fall-risk/{member_id}/assessments           提交问卷（自动评分 + LLM 建议）
+GET    /api/v1/fall-risk/{member_id}/assessments           评估列表（可按 risk_level 过滤）
+GET    /api/v1/fall-risk/{member_id}/assessments/latest    最新评估
+GET    /api/v1/fall-risk/{member_id}/assessments/{id}      评估详情
+DELETE /api/v1/fall-risk/{member_id}/assessments/{id}      删除评估
+POST   /api/v1/fall-risk/{member_id}/inactivity/check      触发不活动检测
+GET    /api/v1/fall-risk/{member_id}/inactivity            不活动记录列表
+GET    /api/v1/fall-risk/{member_id}/summary               综合概览
+```
 
 ---
 
