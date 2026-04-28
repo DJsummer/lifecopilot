@@ -6,7 +6,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.9-blue)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-green)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/Tests-350%2F350-brightgreen)](#测试)
+[![Tests](https://img.shields.io/badge/Tests-375%2F375-brightgreen)](#测试)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://docs.docker.com/compose/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -30,6 +30,7 @@
 | 🥗 个性化营养规划 | ✅ 已完成 | BMR 公式 + LLM 营养目标 + 每周食谱 + 饮食日志估算 |
 | 🏃 运动方案生成与追踪 | ✅ 已完成 | 体能评估问卷 + LLM 7天计划 + METs 热量估算 + 每周汇总 |
 | 🔔 慢病趋势预测与告警 | ✅ 已完成 | 个性化阈值规则引擎 + 自动告警 + 最小二乘趋势分析 + LLM 解读 |
+| 😴 睡眠质量分析 | ✅ 已完成 | 多维评分算法 + 呼吸暂停风险检测 + 趋势汇总 + LLM 改善建议 |
 
 ---
 
@@ -293,6 +294,13 @@ DELETE /api/v1/alerts/{member_id}/alerts/{id}         删除告警
 POST   /api/v1/alerts/{member_id}/trends              生成趋势快照（LLM 解读可选）
 GET    /api/v1/alerts/{member_id}/trends              趋势快照列表
 GET    /api/v1/alerts/{member_id}/trends/latest       获取某指标最新趋势快照
+
+# 睡眠质量分析（T006）
+POST   /api/v1/sleep/{member_id}/records              录入睡眠数据（自动评分 + LLM 建议）
+GET    /api/v1/sleep/{member_id}/records              睡眠记录列表（可按质量过滤）
+GET    /api/v1/sleep/{member_id}/records/{id}         记录详情
+DELETE /api/v1/sleep/{member_id}/records/{id}         删除记录
+GET    /api/v1/sleep/{member_id}/summary              近 N 天趋势汇总统计
 ```
 
 ---

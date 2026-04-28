@@ -20,3 +20,4 @@ from src.models.health_alert import (  # noqa: F401
     HealthThreshold, HealthAlert, HealthTrendSnapshot,
     AlertSeverity, AlertStatus, TrendDirection,
 )
+from src.models.sleep import SleepRecord, SleepQuality, ApneaRisk  # noqa: F401

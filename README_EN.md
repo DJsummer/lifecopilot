@@ -4,7 +4,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.9-blue)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-green)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/Tests-350%2F350-brightgreen)](#testing)
+[![Tests](https://img.shields.io/badge/Tests-375%2F375-brightgreen)](#testing)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://docs.docker.com/compose/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -30,6 +30,7 @@
 | 🥗 Personalised Nutrition Plan | ✅ Done | BMR formula + LLM nutrition goals + weekly meal plan + diet log analysis |
 | 🏃 Exercise Plan & Tracking | ✅ Done | Fitness assessment + LLM 7-day plan + METs calorie estimation + weekly summary |
 | 🔔 Chronic Disease Alerts | ✅ Done | Per-member threshold engine + auto-alerts on entry + linear trend analysis + LLM insight |
+| 😴 Sleep Quality Analysis | ✅ Done | Multi-factor scoring + apnea risk detection + N-day trend summary + LLM improvement advice |
 
 ---
 

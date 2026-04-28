@@ -70,6 +70,7 @@ class Member(BaseModel):
     health_thresholds: Mapped[list["HealthThreshold"]] = relationship(back_populates="member", cascade="all, delete-orphan")
     health_alerts: Mapped[list["HealthAlert"]] = relationship(back_populates="member", cascade="all, delete-orphan")
     health_trend_snapshots: Mapped[list["HealthTrendSnapshot"]] = relationship(back_populates="member", cascade="all, delete-orphan")
+    sleep_records: Mapped[list["SleepRecord"]] = relationship(back_populates="member", cascade="all, delete-orphan")
 
 
 # 避免循环导入，延迟引用
@@ -82,3 +83,4 @@ from src.models.skin_analysis import SkinAnalysis  # noqa: E402
 from src.models.nutrition import NutritionGoal, MealPlan, DietLog  # noqa: E402
 from src.models.exercise import FitnessAssessment, ExercisePlan, WorkoutLog  # noqa: E402
 from src.models.health_alert import HealthThreshold, HealthAlert, HealthTrendSnapshot  # noqa: E402
+from src.models.sleep import SleepRecord  # noqa: E402

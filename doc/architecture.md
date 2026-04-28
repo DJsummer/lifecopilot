@@ -1,9 +1,9 @@
 # LifePilot — 系统架构设计文档
 
-> 版本：v1.2  
+> 版本：v1.3  
 > 日期：2026-05-01  
 > 状态：进行中  
-> 变更：T015（运动方案）+ T005（慢病趋势预测与告警）完成，350 个测试全部通过
+> 变更：T006（睡眠质量分析）完成，375 个测试全部通过
 
 ---
 
@@ -276,7 +276,8 @@ Family
                 ├── n  WorkoutLog         (运动记录日志)                       ← T015
                 ├── n  HealthThreshold    (个性化健康阈值配置)              ← T005
                 ├── n  HealthAlert        (健康超阈预警记录)                 ← T005
-                └── n  HealthTrendSnapshot(趋势分析快照)                      ← T005
+                ├── n  HealthTrendSnapshot(趋势分析快照)                      ← T005
+                └── n  SleepRecord        (睡眠分期+评分+呼吸暂停风险)           ← T006
 
 FoodItem  (食物营养素数据库，独立表)
 ```
@@ -483,6 +484,15 @@ DELETE /api/v1/alerts/{member_id}/alerts/{id}         删除告警
 POST   /api/v1/alerts/{member_id}/trends              生成趋势快照（LLM 解读可选）
 GET    /api/v1/alerts/{member_id}/trends              趋势快照列表
 GET    /api/v1/alerts/{member_id}/trends/latest       某指标最新快照
+```
+
+#### 睡眠质量分析（✅ 已完成 T006）
+```
+POST   /api/v1/sleep/{member_id}/records         录入睡眠数据（自动评分 + LLM 建议）
+GET    /api/v1/sleep/{member_id}/records         记录列表（可按 quality 过滤）
+GET    /api/v1/sleep/{member_id}/records/{id}    记录详情
+DELETE /api/v1/sleep/{member_id}/records/{id}    删除记录
+GET    /api/v1/sleep/{member_id}/summary         近 N 天趋势汇总统计
 ```
 
 #### 系统
