@@ -1,7 +1,7 @@
 # LifePilot - 家庭健康管理 AI 项目任务清单
 
 > 创建日期：2026-04-24  
-> 最后更新：2026-05-01（T006 睡眠质量分析：多维评分 + 呼吸暂停风险检测 + LLM 改善建议，25 个测试全部通过）  
+> 最后更新：2026-05-01（T007 児童生长发育评估：WHO LMS 百分位计算 + 里程碑追踪 + LLM 评估，32 个测试全部通过）  
 > 目标：用 AI 技术实现一套家庭健康管理系统
 
 ---
@@ -29,7 +29,7 @@ git push
 |------|------|--------|
 | 阶段零：部署基础设施 | ✅ 已完成 | 100% |
 | 阶段一：基础架构搭建 | ✅ 已完成 | 100% |
-| 阶段二：核心健康监测 | 🔄 进行中 | 40%（T005/T006 完成，T007-T008 待实现）|
+| 阶段二：核心健康监测 | 🔄 进行中 | 60%（T005/T006/T007 完成，T008 待实现）|
 | 阶段三：智能问诊助手 | ✅ 已完成 | 100%（5/5 任务完成）|
 | 阶段四：生活方式干预 | ✅ 已完成 | 100%（3/3 任务全部完成）|
 | 阶段五：智能家居联动 | ⬜ 未开始 | 0% |
@@ -232,11 +232,32 @@ DELETE /api/v1/sleep/{member_id}/records/{id}     删除记录
 GET    /api/v1/sleep/{member_id}/summary          近 N 天趋势汇总统计
 ```
 
-### T007 - 儿童生长发育评估
-- [ ] 集成 WHO 儿童生长标准数据
-- [ ] 实现身高/体重/BMI 百分位计算与可视化
-- [ ] 追踪发育里程碑（运动/语言/认知）
-- [ ] 生成儿科就诊前评估摘要
+### T007 - 児童生长发育评估 ✅
+> 完成于 2026-05-01
+
+- [x] 集成 WHO 生长标准数据（LMS 参数内置，0-60 月龄，男/女分开）
+- [x] LMS 方法计算身高/体重百分位及 Z-score
+- [x] BMI 计算（月龄 ≥ 24 月时评估）
+- [x] 7 级 GrowthCategory 分级（P1/P3/P15/P85/P97/P99 分界）
+- [x] 24 条系统预设发育里程碑（AAP/WHO 参考，大运动/精细动作/语言/认知/社会情感 5类）
+- [x] 里程碑达成记录（记录达成日期和实际月龄）
+- [x] LLM 生成综合生长评估报告（失败时静默降级为规则建议）
+- [x] 11 个 REST 端点：生长记录 CRUD / 里程碑初始化+CRUD+达成 / 生长概览
+- [x] 32 个集成 + 单元测试（LLM 全部 mock），总计 407/407 通过
+- [x] Alembic 迁移：`0012_growth`（growth_records / development_milestones）
+
+```
+POST   /api/v1/growth/{member_id}/records              录入身高/体重（WHO 百分位 + LLM 评估）
+GET    /api/v1/growth/{member_id}/records              生长记录列表
+GET    /api/v1/growth/{member_id}/records/{id}         记录详情
+DELETE /api/v1/growth/{member_id}/records/{id}         删除记录
+POST   /api/v1/growth/{member_id}/milestones/init      初始化预设里程碑（24 条，幂等）
+POST   /api/v1/growth/{member_id}/milestones           添加自定义里程碑
+GET    /api/v1/growth/{member_id}/milestones           里程碑列表（可按类型/状态过滤）
+PATCH  /api/v1/growth/{member_id}/milestones/{id}/achieve 标记已达成
+DELETE /api/v1/growth/{member_id}/milestones/{id}      删除自定义里程碑
+GET    /api/v1/growth/{member_id}/summary              生长概览（最新记录+里程碑统计）
+```
 
 ### T008 - 老人跌倒风险评估
 - [ ] 定义跌倒风险评估指标（活动频率、步态数据、疾病史）
@@ -545,6 +566,7 @@ GET  /api/v1/fitness/{member_id}/summary/weekly     每周运动汇总统计
 | P1 🟡 | T022 Flutter App | 高 | 高 | ⬜ 未开始 |
 | P1 🟡 | T023 Web 管理后台 | 高 | 中 | ⬜ 未开始 |
 | P2 🟢 | T006 睡眠分析 | 中 | 中 | ✅ 已完成 |
+| P2 🟢 | T007 儿童生长发育评估 | 中 | 中 | ✅ 已完成 |
 | P2 🟢 | T013 照片辅助分析 | 中 | 中 | ⬜ 未开始 |
 | P2 🟢 | T016 心理健康筛查 | 中 | 中 | ✅ 已完成 |
 | P3 ⚪ | T008 老人跌倒检测 | 中 | 高 | ⬜ 未开始 |

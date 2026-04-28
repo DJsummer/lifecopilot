@@ -21,3 +21,7 @@ from src.models.health_alert import (  # noqa: F401
     AlertSeverity, AlertStatus, TrendDirection,
 )
 from src.models.sleep import SleepRecord, SleepQuality, ApneaRisk  # noqa: F401
+from src.models.growth import (  # noqa: F401
+    GrowthRecord, DevelopmentMilestone,
+    GrowthCategory, MilestoneType, MilestoneStatus,
+)

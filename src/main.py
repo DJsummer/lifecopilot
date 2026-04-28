@@ -21,6 +21,7 @@ from src.api.v1.routers import nutrition as nutrition_router
 from src.api.v1.routers import fitness as fitness_router
 from src.api.v1.routers import alert as alert_router
 from src.api.v1.routers import sleep as sleep_router
+from src.api.v1.routers import growth as growth_router
 
 log = structlog.get_logger()
 
@@ -70,4 +71,5 @@ app.include_router(nutrition_router.router, prefix="/api/v1/nutrition", tags=["n
 app.include_router(fitness_router.router, prefix="/api/v1/fitness", tags=["fitness"])
 app.include_router(alert_router.router, prefix="/api/v1/alerts", tags=["alerts"])
 app.include_router(sleep_router.router, prefix="/api/v1/sleep", tags=["sleep"])
+app.include_router(growth_router.router, prefix="/api/v1/growth", tags=["growth"])
 
