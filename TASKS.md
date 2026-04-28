@@ -1,7 +1,7 @@
 # LifePilot - 家庭健康管理 AI 项目任务清单
 
 > 创建日期：2026-04-24  
-> 最后更新：2026-05-01（T008 老人跌倒风险评估：改进 Morse/Hendrich II 评分 + 不活动检测 + LLM 干预建议，28 个测试全部通过）  
+> 最后更新：2026-05-01（T017 环境健康监控：PM2.5/CO₂/温湿度传感器 + 健康阈值耦警 + 小米/Home Assistant 接入 + LLM 建议，52 个测试全部通过）  
 > 目标：用 AI 技术实现一套家庭健康管理系统
 
 ---
@@ -32,7 +32,7 @@ git push
 | 阶段二：核心健康监测 | 🔄 进行中 | 80%（T005/T006/T007/T008 完成，T009+ 属阶段三）|
 | 阶段三：智能问诊助手 | ✅ 已完成 | 100%（5/5 任务完成）|
 | 阶段四：生活方式干预 | ✅ 已完成 | 100%（3/3 任务全部完成）|
-| 阶段五：智能家居联动 | ⬜ 未开始 | 0% |
+| 阶段五：智能家居联动 | 🔄 进行中 | 25%（T017 环境监控完成）|
 | 阶段六：报告与就医辅助 | 🔄 进行中 | 75%（T018/T019/T020 完成，PDF/定时任务延后）|
 | 阶段七：前端与产品化 | ⬜ 未开始 | 0% |
 
@@ -475,11 +475,35 @@ GET  /api/v1/fitness/{member_id}/summary/weekly     每周运动汇总统计
 
 ## 阶段五：智能家居联动
 
-### T017 - 环境健康监控
-- [ ] 集成传感器数据接入（PM2.5、CO₂、温湿度）
-- [ ] 建立环境健康阈值规则
-- [ ] 联动智能家居设备（米家/Home Assistant API）
-- [ ] 环境报告可视化 Dashboard
+### T017 - 环境健康监控 ✅
+> 完成于 2026-05-01
+
+- [x] 集成传感器数据接入（PM2.5、CO₂、温度、湿度、VOC、噪音、CO，共 8 种指标）
+  - 手动录入（manual）/ 小米传感器 Webhook（xiaomi）/ Home Assistant Webhook三类来源
+  - MiHome lumi.sensor_ht 属性映射适配器
+  - Home Assistant entity_id 关键词匹配适配器
+- [x] 建立环境健康阈值规则（WHO 2021 / 国标 GB/T18883）
+  - warning / danger 双级阈値，温湿度支持高値+低値双向检测
+  - 录入时自动 is_alert / alert_level 标注
+- [x] 综合空气质量等级（EXCELLENT/GOOD/MODERATE/POOR/VERY_POOR/HAZARDOUS）
+  - 取各指标最差等级作为综合结果
+- [x] LLM 生成个性化环境改善建议，失败时静默降级为规则建议
+- [x] 10 个 REST 端点：单条/批量录入 / 列表过滤 / 详情/删除 / 综合摘要 / LLM建议+历史 / Webhook 小米+HA
+- [x] 52 个集成 + 单元测试（LLM 全部 mock），总计 487/487 通过
+- [x] Alembic 迁移：`0014_environment`（environment_records / environment_advice）
+
+```
+POST   /api/v1/environment/{member_id}/records                    手动录入一条环境指标
+POST   /api/v1/environment/{member_id}/records/batch              批量录入（最多 200 条）
+GET    /api/v1/environment/{member_id}/records                    记录列表（可按指标类型/位置/时间窗口/告警过滤）
+GET    /api/v1/environment/{member_id}/records/{id}               单条详情
+DELETE /api/v1/environment/{member_id}/records/{id}               删除记录
+GET    /api/v1/environment/{member_id}/summary                   当前室内环境综合摘要
+POST   /api/v1/environment/{member_id}/advice                    生成 LLM 环境改善建议
+GET    /api/v1/environment/{member_id}/advice                    历史 LLM 建议列表
+POST   /api/v1/environment/{member_id}/webhook/xiaomi            小米传感器 Webhook 接入
+POST   /api/v1/environment/{member_id}/webhook/home-assistant    Home Assistant Webhook 接入
+```
 
 ---
 

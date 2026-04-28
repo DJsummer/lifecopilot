@@ -29,3 +29,7 @@ from src.models.fall_risk import (  # noqa: F401
     FallRiskAssessment, InactivityLog,
     FallRiskLevel, ActivityStatus,
 )
+from src.models.environment import (  # noqa: F401
+    EnvironmentRecord, EnvironmentAdvice,
+    EnvMetricType, AirQualityLevel, DeviceType,
+)

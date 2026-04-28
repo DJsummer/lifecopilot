@@ -6,7 +6,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.9-blue)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-green)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/Tests-435%2F435-brightgreen)](#测试)
+[![Tests](https://img.shields.io/badge/Tests-487%2F487-brightgreen)](#测试)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://docs.docker.com/compose/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -33,6 +33,7 @@
 | 😴 睡眠质量分析 | ✅ 已完成 | 多维评分算法 + 呼吸暂停风险检测 + 趋势汇总 + LLM 改善建议 |
 | 👶 児童生长发育评估 | ✅ 已完成 | WHO LMS 百分位 + Z-score + 5类里程碑追踪 + LLM 报告 |
 | 👴 老人跌倒风险评估 | ✅ 已完成 | 改进版 Morse/Hendrich II 评分 + 不活动检测 + 紧急联系人告警 + LLM 干预建议 |
+| 🌡️ 环境健康监控 | ✅ 已完成 | PM2.5/CO₂/温湿度/VOC/噪音 + WHO阈值耦警 + 小米/Home Assistant接入 + LLM建议 |
 
 ---
 
@@ -325,6 +326,18 @@ DELETE /api/v1/fall-risk/{member_id}/assessments/{id}      删除评估
 POST   /api/v1/fall-risk/{member_id}/inactivity/check      触发不活动检测（返回 InactivityLog 或 null）
 GET    /api/v1/fall-risk/{member_id}/inactivity            不活动记录列表
 GET    /api/v1/fall-risk/{member_id}/summary               综合概览（评估统计 + 最新风险等级）
+
+# 环境健康监控（T017）
+POST   /api/v1/environment/{member_id}/records                 手动录入环境指标（阈值自动耦警标注）
+POST   /api/v1/environment/{member_id}/records/batch           批量录入（最多 200 条）
+GET    /api/v1/environment/{member_id}/records                 记录列表（支持指标类型/位置/时间窗口/告警过滤）
+GET    /api/v1/environment/{member_id}/records/{id}            记录详情
+DELETE /api/v1/environment/{member_id}/records/{id}            删除记录
+GET    /api/v1/environment/{member_id}/summary                室内环境综合摘要（各指标最新局 + 空气质量等级）
+POST   /api/v1/environment/{member_id}/advice                  生成 LLM 环境建议
+GET    /api/v1/environment/{member_id}/advice                  历史建议列表
+POST   /api/v1/environment/{member_id}/webhook/xiaomi          小米传感器 Webhook 接入
+POST   /api/v1/environment/{member_id}/webhook/home-assistant  Home Assistant Webhook 接入
 ```
 
 ---
@@ -370,7 +383,7 @@ pip install -r requirements-test.txt
 python -m pytest tests/ --ignore=tests/e2e -v
 ```
 
-**测试状态：435/435 通过 ✅**
+**测试状态：487/487 通过 ✅**
 
 | 测试文件 | 内容 | 数量 |
 |----------|------|------|
@@ -391,6 +404,7 @@ python -m pytest tests/ --ignore=tests/e2e -v
 | `test_sleep.py` | 睡眠记录/评分/趋势汇总 | 25 |
 | `test_growth.py` | 儿童生长/WHO百分位/里程碑 | 32 |
 | `test_fall_risk.py` | 跌倒风险评估/不活动检测/评分算法 | 28 |
+| `test_environment.py` | 环境指标录入/阈值告警/Webhook/LLM建议 | 52 |
 | `test_exercise.py` | 运动方案/追踪/汇总 | 38 |
 | `test_system.py` | 健康检查 | 2 |
 

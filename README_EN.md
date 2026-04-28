@@ -4,7 +4,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.9-blue)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-green)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/Tests-435%2F435-brightgreen)](#testing)
+[![Tests](https://img.shields.io/badge/Tests-487%2F487-brightgreen)](#testing)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://docs.docker.com/compose/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -33,6 +33,7 @@
 | 😴 Sleep Quality Analysis | ✅ Done | Multi-factor scoring + apnea risk detection + N-day trend summary + LLM improvement advice |
 | 👶 Child Growth & Development | ✅ Done | WHO LMS percentile + Z-score + 5-category milestone tracking + LLM report |
 | 👴 Elderly Fall Risk Assessment | ✅ Done | Enhanced Morse/Hendrich II scoring + inactivity detection + emergency contact alert + LLM intervention |
+| 🌡️ Environment Health Monitoring | ✅ Done | PM2.5/CO₂/temperature/humidity/VOC + WHO threshold alerts + Mi/HA webhook + LLM advice |
 
 ---
 
@@ -253,7 +254,7 @@ pip install -r requirements-test.txt
 python -m pytest tests/ --ignore=tests/e2e -v
 ```
 
-**Test status: 435 / 435 passing ✅**
+**Test status: 487 / 487 passing ✅**
 
 | Test file | Coverage | Count |
 |-----------|----------|-------|
@@ -275,6 +276,7 @@ python -m pytest tests/ --ignore=tests/e2e -v
 | `test_sleep.py` | Sleep records / scoring / trend summary | 25 |
 | `test_growth.py` | Child growth / WHO percentile / milestones | 32 |
 | `test_fall_risk.py` | Fall risk assessment / inactivity detection / scoring | 28 |
+| `test_environment.py` | Env records / threshold alerts / Webhook / LLM advice | 52 |
 | `test_system.py` | Health check | 2 |
 
 ---

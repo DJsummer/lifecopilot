@@ -1,9 +1,9 @@
 # LifePilot — 系统架构设计文档
 
-> 版本：v1.5  
+> 版本：v1.6  
 > 日期：2026-05-01  
 > 状态：进行中  
-> 变更：T008（老人跌倒风险评估）完成，435 个测试全部通过
+> 变更：T017（环境健康监控）完成，487 个测试全部通过
 
 ---
 
@@ -281,7 +281,10 @@ Family
                 ├── n  GrowthRecord       (WHO 百分位+Z-score+生长评分)         ← T007
                 ├── n  DevelopmentMilestone (发育里程碑追踪)                  ← T007
                 ├── n  FallRiskAssessment  (跌倒风险评估+改进 Morse/Hendrich 评分)  ← T008
-                └── n  InactivityLog       (长时间不活动检测+联系人告警)          ← T008
+                ├── n  InactivityLog       (长时间不活动检测+联系人告警)          ← T008
+
+EnvironmentRecord  (环境指标采集记录，按家庭分组)            ← T017
+EnvironmentAdvice  (LLM 环境改善建议快照)                       ← T017
 
 FoodItem  (食物营养素数据库，独立表)
 ```
@@ -523,6 +526,20 @@ DELETE /api/v1/fall-risk/{member_id}/assessments/{id}      删除评估
 POST   /api/v1/fall-risk/{member_id}/inactivity/check      触发不活动检测（返回 InactivityLog 或 null）
 GET    /api/v1/fall-risk/{member_id}/inactivity            不活动记录列表
 GET    /api/v1/fall-risk/{member_id}/summary               综合概览（评估统计+最新风险等级）
+```
+
+#### 环境健康监控（✅ 已完成 T017）
+```
+POST   /api/v1/environment/{member_id}/records                 PM2.5/CO₂/温湿度等指标手动录入
+POST   /api/v1/environment/{member_id}/records/batch           批量录入（最多 200 条）
+GET    /api/v1/environment/{member_id}/records                 记录列表（指标类型/位置/时间窗口/告警过滤）
+GET    /api/v1/environment/{member_id}/records/{id}            单条详情
+DELETE /api/v1/environment/{member_id}/records/{id}            删除记录
+GET    /api/v1/environment/{member_id}/summary                室内环境综合摘要（各指标最新局 + AQI 等级）
+POST   /api/v1/environment/{member_id}/advice                  生成 LLM 环境建议
+GET    /api/v1/environment/{member_id}/advice                  历史建议列表
+POST   /api/v1/environment/{member_id}/webhook/xiaomi          小米传感器 Webhook 接入
+POST   /api/v1/environment/{member_id}/webhook/home-assistant  Home Assistant Webhook 接入
 ```
 
 #### 系统
